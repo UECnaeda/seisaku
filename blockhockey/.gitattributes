@@ -1,0 +1,56 @@
+* ## Unity ##
+
+*.cs diff=csharp text
+*.cginc text
+*.shader text
+
+*.mat merge=unityyamlmerge eol=lf
+*.anim merge=unityyamlmerge eol=lf
+*.unity merge=unityyamlmerge eol=lf
+*.prefab merge=unityyamlmerge eol=lf
+*.physicsMaterial2D merge=unityyamlmerge eol=lf
+*.physicMaterial merge=unityyamlmerge eol=lf
+*.asset merge=unityyamlmerge eol=lf
+*.meta merge=unityyamlmerge eol=lf
+*.controller merge=unityyamlmerge eol=lf
+
+
+## git-lfs ##
+
+#Image
+*.jpg !filter !diff !merge -text
+*.jpeg !filter !diff !merge -text
+*.png !filter !diff !merge -text
+*.gif !filter !diff !merge -text
+*.psd !filter !diff !merge -text
+*.ai !filter !diff !merge -text
+
+#Audio
+*.mp3 !filter !diff !merge -text
+*.wav !filter !diff !merge -text
+*.ogg !filter !diff !merge -text
+
+#Video
+*.mp4 !filter !diff !merge -text
+*.mov !filter !diff !merge -text
+
+#3D Object
+*.FBX !filter !diff !merge -text
+*.fbx !filter !diff !merge -text
+*.blend !filter !diff !merge -text
+*.obj !filter !diff !merge -text
+
+#ETC
+*.a !filter !diff !merge -text
+*.exr !filter !diff !merge -text
+*.tga !filter !diff !merge -text
+*.pdf !filter !diff !merge -text
+*.zip !filter !diff !merge -text
+*.dll !filter !diff !merge -text
+*.unitypackage !filter !diff !merge -text
+*.aif !filter !diff !merge -text
+*.ttf !filter !diff !merge -text
+*.rns !filter !diff !merge -text
+*.reason !filter !diff !merge -text
+*.lxo !filter !diff !merge -text
+*.dylib !filter !diff !merge -text
