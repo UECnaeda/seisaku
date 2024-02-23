@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class bar1p : MonoBehaviour
 {
+    const float barspeed = 18f;
+    const float defPosX = -11f;
+    const float smashspeed = 20f;
+    const float smashtime = 8f;
     float velY;
 
     float velX;
@@ -56,52 +60,48 @@ public class bar1p : MonoBehaviour
 
         PosY = this.transform.position.y;
 
+        //縦横移動
         if (Input.GetKey(KeyCode.W) || ycon < 0f)
         {
-            velY = 18f;
+            velY = barspeed;
         }
-        if (ycon == 0f)
+        else if (Input.GetKey(KeyCode.S) || ycon > 0f)
+        {
+            velY = -barspeed;
+        }
+        else 
         {
             velY = 0f;
         }
-        if (Input.GetKey(KeyCode.S) || ycon > 0f)
-        {
-            velY = -18f;
-        }
-        if (Input.GetKeyUp(KeyCode.S))
-        {
-            velY = 0f;
-        }
-        if (Input.GetKeyUp(KeyCode.W))
-        {
-            velY = 0f;
-        }
+
+        //smash
         if (Input.GetKeyDown(KeyCode.D) || Input.GetButtonDown("1pA"))
         {
+            if(space)time = 0;
             space = false;
-
-            velX = 10f;
-
         }
         if (space == false)
         {
+            if(time < smashtime)
+            {
+                velX = smashspeed;
+            }
+            else if(time > smashtime*3f/2f)
+            {
+                velX = 0f;
+                space = true;
+            }
+            else
+            {
+                velX = -2f * smashspeed;
+            }
+
             time++;
         }
-        if (time > 4f)
+        else if (PosX != defPosX)
         {
-            velX =  -40f;
-        }
-        if (time > 7f)
-        {
-            velX = 0f;
-
-            time = 0;
-
-            space = true;
-        }
-        if (PosX < -11f)
-        {
-            PosX = -11f;
+        
+            PosX = defPosX;
         }
         transform.position = new Vector3(PosX, PosY, 0f);
         /*if (Input.GetKeyUp(KeyCode.W))
