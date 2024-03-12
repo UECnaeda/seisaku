@@ -25,6 +25,51 @@ public class zunda : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(GameMaker.instance.zunda_speak){
+            Singface++;
+            if(zundajoutai==0){
+                if(Singface%sabun==0){
+                    zundaSR.sprite = zundagood0;
+                }else if(Singface%sabun == 1){
+                    zundaSR.sprite = zundagood1;
+                }else if(Singface%sabun == 2){
+                    zundaSR.sprite = zundagood2;
+                }
+            }else if(zundajoutai==1){
+                if(Singface%sabun==0){
+                    zundaSR.sprite = zundanormal0;
+                }else if(Singface%sabun == 1){
+                    zundaSR.sprite = zundanormal1;
+                }else if(Singface%sabun == 2){
+                    zundaSR.sprite = zundanormal2;
+                }
+            }else if(zundajoutai==2){
+                if(Singface%sabun==0){
+                    zundaSR.sprite = zundanogood0;
+                }else if(Singface%sabun == 1){
+                    zundaSR.sprite = zundanogood1;
+                }else if(Singface%sabun == 2){
+                    zundaSR.sprite = zundanogood2;
+                }
+            }else if(zundajoutai==3){
+                if(Singface%sabun==0){
+                    zundaSR.sprite = zundabad0;
+                }else if(Singface%sabun == 1){
+                    zundaSR.sprite = zundabad1;
+                }else if(Singface%sabun == 2){
+                    zundaSR.sprite = zundabad2;
+                }
+            }
+        }else if(!GameMaker.instance.zunda_singnow){
+            if(zundajoutai==0){
+                zundaSR.sprite = zundagoodmute;
+            }else if(zundajoutai==1){
+                zundaSR.sprite = zundanormalmute;
+            }else if(zundajoutai==2){
+                zundaSR.sprite = zundanogoodmute;
+            }else if(zundajoutai==3){
+                zundaSR.sprite = zundabadmute;
+            }
+        }
     }
 }

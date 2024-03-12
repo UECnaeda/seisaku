@@ -6,6 +6,8 @@ using Unity.Burst.Intrinsics;
 
 public class note : MonoBehaviour
 {
+    //音楽用
+    AudioSource songsound;
     //生成するノーツ
     public GameObject notes;
     List<GameObject> nownotes = new List<GameObject>();
@@ -26,6 +28,13 @@ public class note : MonoBehaviour
     int nextnumbers;
     int nownumbers = 1;
     bool noteend = false;
+    bool songnow = false;
+    bool notelongover = false;
+
+    int i;
+
+    //判定に使用、ノーツの始まりのposxと、音ありかなしかを追加
+    public List<List<float>> notes_timingposx_list = new List<List<float>>();
     //ノーツを作る
     //将来的にはmusicxmlを読み込ませて自動生成できるようにします
     //画面をbeats*６４分割で考えて、その長さ文の値をnotelongに
@@ -232,13 +241,20 @@ public class note : MonoBehaviour
     {"1000","-2","fin"},
     };
     // Start is called before the first frame update
+    void Awake()
+    {
+        songsound = GetComponent<AudioSource>();
+
+    }
     void Start()
     {
         songdata = shiningstar;
         notemake();
+
     }
     
     void notemake(){
+        notes_timingposx_list.Clear();
         int i = 0;
         int song4syo = 256;
         while(song4syo != 0){
@@ -248,25 +264,59 @@ public class note : MonoBehaviour
         //4小節に入る残りの容量より次のsongdataの長さが長い場合
             if(song4syo<notelong){
                 Debug.Log("song4syo<notelong");
-                if (songdata[notenumbers, 1] != "-1")
+                if (songdata[notenumbers, 1] == "-2")
                 {
+                    //タイミング計算用
+                    List<float> data = new List<float>();
+                    data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
+                    //-2は休符
+                    data.Add(-2);
+                    notes_timingposx_list.Add(data);
+                    noteend = true;
+                    break;
+                }else if (songdata[notenumbers, 1] == "-1"){
+                    //タイミング計算用
+                    List<float> data = new List<float>();
+                    data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
+                    //-1は休符
+                    data.Add(1);
+                    notes_timingposx_list.Add(data);
+                }else{
+                    //noteを生成　高さ、長さ、大きさを曲データに合わせる
                     noteslocy = karaokebarloc - (karaokebarheight / 2) + (karaokebarheight * float.Parse(songdata[notenumbers, 1]) / soundvalue);
                     notesize = onteiba / 256 * (float)song4syo;
                     noteslocx = gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2 + notesize / 2;
+                    //スコア計算用
+                    //前のノーツと今生成するノーツが同一音である場合とそうでない場合で分ける
+                    if(notelongover){
+                        notelongover = false;
+                    }else{
+                        List<float> data = new List<float>();
+                        data.Add(noteslocx - notesize / 2);
+                        //音程をadd
+                        data.Add(float.Parse(songdata[notenumbers,1]));
+                        notes_timingposx_list.Add(data);
+                    }
+                    
+                    //nownotesに追加
                     nownotes.Add(Instantiate(notes, new Vector3(noteslocx, noteslocy, -3f), Quaternion.identity));
                     nownotes[i].transform.localScale = new Vector3(notesize, 0.26666666f, 1f);
                 }
-                if (songdata[notenumbers, 1] == "-2")
-                {
-                    noteend = true;
-                    break;
-                }
+                //あまったnotelongを今のsongdataに戻す
+                //この場合タイミング計算用に判定を追加するとまずいのでそれ用の変数を用意する
+                notelongover = true;
                 notelong -= song4syo;
                 songdata[notenumbers, 0] = notelong.ToString();
                 break;
             }
             if (songdata[notenumbers, 1] == "-2")
             {
+                //タイミング計算用
+                List<float> data = new List<float>();
+                data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
+                //-2は休符
+                data.Add(-2);
+                notes_timingposx_list.Add(data);
                 noteend = true;
                 break;
             }
@@ -274,6 +324,17 @@ public class note : MonoBehaviour
                 noteslocy = karaokebarloc-(karaokebarheight/2) +  (karaokebarheight*float.Parse(songdata[notenumbers,1])/soundvalue);
                 notesize = onteiba / 256 * (float)notelong;
                 noteslocx = gamescreenx/256*(float)(256-song4syo)-gamescreenx/2 + notesize/2;
+                //タイミング計算用
+                if(notelongover){
+                    notelongover = false;
+                }else{
+                    List<float> data = new List<float>();
+                    data.Add(noteslocx - notesize / 2);
+                    //音程をadd
+                    data.Add(float.Parse(songdata[notenumbers,1]));
+                    notes_timingposx_list.Add(data);
+                }
+                //nownotesにノーツ情報を加える
                 nownotes.Add(Instantiate(notes, new Vector3(noteslocx,noteslocy, -3f), Quaternion.identity));
                 nownotes[i].transform.localScale = new Vector3(notesize, 0.26666666f, 1f);
                 nownumbers = notenumbers;
@@ -283,18 +344,33 @@ public class note : MonoBehaviour
             }
             else
             {
+                //タイミング計算用
+                List<float> data = new List<float>();
+                data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
+                //-1は休符
+                data.Add(-1);
+                notes_timingposx_list.Add(data);
                 nownumbers = notenumbers;
                 notenumbers++;
                 song4syo -= notelong;
             }
             Debug.Log(songdata[nownumbers,2]);
         }
+        for(i=0;i<notes_timingposx_list.Count;++i){
+            Debug.Log($"note:note_timingpos_list[{i}][0] = {notes_timingposx_list[i][0]}");
+            Debug.Log($"note:note_timingpos_list[{i}][1] = {notes_timingposx_list[i][1]}");
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(GameMaker.instance.musicstart&&!songnow){
+            Debug.Log("note:start music");
+            songsound.Play();
+            songnow = true;
+        }
+        songsound.pitch = GameMaker.instance.gamespeed;
         //譜面できたら全部壊して全部作る
         //4小節分生成していく予定ですが…
         if(GameMaker.instance.destroybar){
