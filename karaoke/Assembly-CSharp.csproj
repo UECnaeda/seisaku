@@ -64,8 +64,9 @@
     <Compile Include="Assets\Scripts\GameMaker.cs" />
     <Compile Include="Assets\Scripts\karaokeloc.cs" />
     <Compile Include="Assets\Scripts\Sliced.cs" />
-    <Compile Include="Assets\note.cs" />
-    <Compile Include="Assets\greatline.cs" />
+    <Compile Include="Assets\Scripts\note.cs" />
+    <Compile Include="Assets\Scripts\zunda.cs" />
+    <Compile Include="Assets\Scripts\greatline.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shader\karaokebar.shader" />

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class GameMaker : MonoBehaviour
 {
+    public int setfpsvalue = 60;
     //シングルトンにします　わけわからんかったらhttps://umistudioblog.com/singletonhowto/
     public static GameMaker instance;
     /*
@@ -50,6 +51,9 @@ public class GameMaker : MonoBehaviour
     float geneposx;
     //音程のやつをすべてこわす
     public bool destroybar = false;
+
+    //jump機能したときのボタン
+    bool jumpbothcheck = false;
     // Start is called before the first frame update
     void Awake()
     {
@@ -66,7 +70,7 @@ public class GameMaker : MonoBehaviour
             Destroy(gameObject);
         }
         //FPSの初期設定　変えたいならinstance使う
-        SetFps(60);
+        SetFps(setfpsvalue);
         //karaokeloc = GameObject.Find("karaokeloc").GetComponent<GameObject>();
         soundslider = GameObject.Find("Slider").GetComponent<Slider>();
         audioSource = GetComponent<AudioSource>();
@@ -83,13 +87,19 @@ public class GameMaker : MonoBehaviour
     private void OnEnable()
     {
         gamecontrols = new Gamecontrols();
+        /*
         gamecontrols.Player.Jumppress.started += OnJumppress;
         gamecontrols.Player.Jumppress.performed += OnJumppress;
         gamecontrols.Player.Jumppress.canceled += OnJumppress;
         gamecontrols.Player.Jumprelease.started += OnJumprelease;
         gamecontrols.Player.Jumprelease.performed += OnJumprelease;
         gamecontrols.Player.Jumprelease.canceled += OnJumprelease;
+        */
+        gamecontrols.Player.Jumpboth.started += OnJumpboth;
+        gamecontrols.Player.Jumpboth.performed += OnJumpboth;
+        gamecontrols.Player.Jumpboth.canceled += OnJumpboth;
         gamecontrols.Enable();
+        InputSystem.pollingFrequency = 121;
     }
     private void OnDestroy()
     {
@@ -97,6 +107,8 @@ public class GameMaker : MonoBehaviour
         // 必ずDisposeする必要がある
         gamecontrols?.Dispose();
     }
+
+    /*
     public void OnJumppress(InputAction.CallbackContext context)
     {   
         if (!context.performed) return;
@@ -109,7 +121,6 @@ public class GameMaker : MonoBehaviour
     // 離された瞬間のコールバック
     public void OnJumprelease(InputAction.CallbackContext context)
     {
-
         if (!context.performed) return;
         Debug.Log("release");
         audioSource.Stop();
@@ -117,7 +128,7 @@ public class GameMaker : MonoBehaviour
         images.sprite = mute;
         nowbar = null;
     }
-
+    */
     void OnSing1(InputValue context)
     {
         sing1 = context.Get<float>();
@@ -126,9 +137,10 @@ public class GameMaker : MonoBehaviour
     {
         sing2 = context.Get<float>();
     }
-    void OnJump(InputValue context)
+    void OnJumpboth(InputAction.CallbackContext context)
     {
-        jump = context.Get<float>();
+        jumpbothcheck = true;
+        jump = context.ReadValue<float>();
     }
     void Sing()
     {   
@@ -230,9 +242,8 @@ public class GameMaker : MonoBehaviour
                 break;
         }
         Debug.Log(selectsound);
-        karaokelocy = karaokebarloc-(karaokebarheight/2) +  (karaokebarheight*(float)selectsound/soundvalue);
+        karaokelocy = karaokebarloc-(karaokebarheight/2) + (karaokebarheight*(float)selectsound/soundvalue);
         nowbar = Instantiate(greatbar, new Vector3(karaokebarpos.x, karaokelocy, -5), Quaternion.identity);
-        nowbar.GetComponent<SpriteRenderer>().color = Color.red;
         geneposx = karaokebarpos.x;
      }
     // Update is called once per frame
@@ -243,26 +254,47 @@ public class GameMaker : MonoBehaviour
             nowbar.transform.localPosition += new Vector3(onteiba/time4sec*Time.deltaTime/2f,0f,0f);
             nowbar.transform.localScale += new Vector3(onteiba/time4sec*Time.deltaTime,0f,0f);
         }
-        soundslider.value = selectsound; //バーを動かす
         //soundtime += Time.deltaTime;
         //selectsound = (int)((soundvalue-1)*(sing1+sing2+2)/4);//スティックの傾きから0～soundvalue-1の値を出す
         selectsound = (int)((soundvalue-1)*(sing1+1)/2);　///sing1だけでやるならこっち
-        //karaokebarを動かす　白いやつ
-        karaokebarpos = karaokebar.transform.position;
+        soundslider.value = selectsound; //バーを動かす
+        karaokebarpos = karaokebar.transform.position;//karaokebarを動かす　白いやつ
         if(karaokebarpos.x >= gamescreenx/2){
             destroybar = true;
             karaokebar.transform.position += new Vector3((gamescreenx/time4sec*Time.deltaTime)-gamescreenx,0f,0f);
-        }else {
+        }else{
             destroybar = false;
             karaokebar.transform.position += new Vector3(gamescreenx/time4sec*Time.deltaTime,0f,0f);
+        }
+
+        //音を変更
+        if(jumpbothcheck){
+            if(jump==1){
+                Sing();
+                images.sprite = speak;
+            }else{
+                audioSource.Stop();
+                images.sprite = mute;
+                nowbar = null;
+            }
+        }else if(jump==1&&(beforesound!=selectsound)){
+            Sing();//音が変わったので呼ぶ
+            beforesound = selectsound;
+        }
+        if(jumpbothcheck){
+            jumpbothcheck = false;
         }
         //karaokelocを動かす　赤い奴
         karaokebarpos = karaokebar.transform.position;
         karaokeloc.transform.position = new Vector3(karaokebarpos.x,karaokelocy,karaokebarpos.z-3f);
-        if(jump==1&&(beforesound!=selectsound||soundtime>=5f)){
-            Sing();//音が変わったので呼ぶ
-            soundtime = 0;
-            beforesound = selectsound;
-        }
+    }
+    void LateUpdate(){
+         if(destroybar){
+            if(jump==1){
+                destroybar = false;
+                nowbar = Instantiate(greatbar, new Vector3(karaokebarpos.x, karaokelocy, -5), Quaternion.identity);
+                nowbar.GetComponent<SpriteRenderer>().color = Color.red;
+            }
+         }
     }
 }

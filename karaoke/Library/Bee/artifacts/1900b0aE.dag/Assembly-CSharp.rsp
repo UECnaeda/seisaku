@@ -375,12 +375,13 @@
 -analyzer:"C:/Program Files/Unity/Hub/Editor/2022.3.20f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"C:/Program Files/Unity/Hub/Editor/2022.3.20f1/Editor/Data/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Gamecontrols.cs"
-"Assets/greatline.cs"
-"Assets/note.cs"
 "Assets/Scripts/GameMaker.cs"
+"Assets/Scripts/greatline.cs"
 "Assets/Scripts/karaokebar.cs"
 "Assets/Scripts/karaokeloc.cs"
+"Assets/Scripts/note.cs"
 "Assets/Scripts/Sliced.cs"
+"Assets/Scripts/zunda.cs"
 -langversion:9.0
 
 /deterministic
