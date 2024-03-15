@@ -8,7 +8,10 @@ using TMPro;
 
 public class GameMaker : MonoBehaviour
 {
+    //fps
     public int setfpsvalue = 60;
+    //ゲーム速度変化
+    public float gamespeed = 1.0f;
     //シングルトンにします　わけわからんかったらhttps://umistudioblog.com/singletonhowto/
     public static GameMaker instance;
     /*
@@ -18,23 +21,7 @@ public class GameMaker : MonoBehaviour
     public float bpm = 158;
     public float beats = 4;
     float time4sec;
-    
-    //カラオケバー
-    public GameObject karaokeloc;
-    public GameObject karaokebar;
-    //バーの大きさ
-    float karaokebarheight = 8;
-    //ロケーション
-    float karaokebarloc = 0.97f;//本当の値から+0.13fしてください　なんかずれてる
-    float karaokelocy;
-    //バー
-    Vector3 karaokebarpos;
-    public Slider soundslider;
-    public Sprite speak, mute;
-    public Image images;
-    //音設定
-    public AudioClip a3e, a3si,a4so, a4u, a5a, a5se, b3u, b4a, b5i, c4o, c4sa, c5e, c5si,c6u, d4e, d4si, d5so, d5u, e4u, e5a, f4o, f4sa, f5e, f5si, g3o, g3sa, g4e, g4si, g5so, g5u;
-    public AudioSource zundavoice_AS;
+
     //数値関連
     float sing1,sing2;
     float jump;
@@ -45,26 +32,19 @@ public class GameMaker : MonoBehaviour
     float onteiba = 18.1f; //音程の奴の最大横幅
     float onteitani; //バーの移動と音程の奴の大きさをインタラクトさせるための単位
     Gamecontrols gamecontrols;
-    //生成する奴
-    public GameObject greatbar;
-    GameObject nowbar;
-    //生成した場所
-    float geneposx;
+
     //音程のやつをすべてこわす
     public bool destroybar = false;
 
     //jump機能したときのボタン
     bool jumpbothcheck = false;
-    float jumpposx = 0f;
+    float jump_posx = 0f;
 
     //ずんだもんが歌ってるかどうか
     public bool zunda_singnow = false;
 
     //歌い始め
     public bool zunda_speak = false;
-
-    //ゲーム速度変化
-    public float gamespeed = 1.0f;
     
     //ゲーム同期
     public bool musicstart = false;
@@ -82,30 +62,99 @@ public class GameMaker : MonoBehaviour
     public note notescript;
     //noteに関する情報List
     List<List<float>> notelist = new List<List<float>>();
-    int notenumber = 0;
+    int note_number = 0;
     int notecount;
 
-    //現在考えるべきnoteの情報
+    //判定に使うノーツの情報
+    //1番目のノーツとバーが重なってるとき、判定のposxを見るのは2番目のノーツ
+    //note_numberの位置の値がnote_timingposx、note_number-1の位置の値がnote_onteiに
     float note_timingposx;
-    float note_ontei;
+    float note_ontei = -1;
 
+    //スコア計算用
 
-    float score = 60;
+    public float score_ontei_sum = 50;
+    public float score_timing_sum = 50;
+    public float score = 0;
+
     float add_good_timingScore = 0.3f;
     float add_safe_timingScore = 0.05f;
     float add_bad_timingScore = -1;
 
+    float add_good_onteiScore = 0.01f;
+    float add_safe_onteiScore = -0.01f;
+    float add_bad_onteiScore = -0.03f;
+    float add_nosing_onteiScore = -0.05f;
+
+    public float nosing_safetime = 0.1f;
+    public float nosing_time = 0f;
+
+    public int count_good_timing = 0;
+    public int count_safe_timing = 0;
+    public int count_bad_timing = 0;
+    public int count_pass_timing = 0;
+
+    //ずんだの顔を変える用
+
+    public float face_good_score = 100f;
+    public float face_normal_score = 80f;
+    public float face_nogood_score = 60f;
+    public float face_bad_score = 40f;
+
+    public int zunda_joutai = 0;
+
+    
+
     public TMP_Text score_display;
+
+    //debug用に
+
+    public TMP_Text debug_display;
+    float timing_ms;
+    //0~3はgood^pass
+    int timing_hantei;
+    int ontei_hantei;
+
+    //から撃ち判定
+
+    bool timing_karauchi;
+
+    //生成する奴
+    public GameObject greatbar;
+    GameObject nowbar;
+
+    //生成した場所
+    float geneposx;
+
+    //カラオケバー
+    public GameObject karaokeloc;
+    public GameObject karaokebar;
+
+    //バーの大きさ
+    float karaokebarheight = 8;
+
+    //ロケーション
+    float karaokebarloc = 0.97f;//本当の値から+0.13fしてください　なんかずれてる
+    float karaokelocy;
+
+    //バー
+    Vector3 karaokebarpos;
+    public Slider soundslider;
+    public Sprite speak, mute;
+    public Image images;
+
+    //音設定
+    public AudioClip a3e, a3si,a4so, a4u, a5a, a5se, b3u, b4a, b5i, c4o, c4sa, c5e, c5si,c6u, d4e, d4si, d5so, d5u, e4u, e5a, f4o, f4sa, f5e, f5si, g3o, g3sa, g4e, g4si, g5so, g5u;
+    public AudioSource zundavoice_AS;
 
 
     void Notelistmaker(ref List<List<float>> NL){
         Debug.Log("GameMaker:Notelistmaker");
-        notenumber = 0;
+        note_number = 0;
         notelist = NL;
         notecount = notelist.Count;
-        if(notenumber < notecount){
-            note_timingposx = notelist[notenumber][0];
-            note_ontei = notelist[notenumber][1];
+        if(note_number < notecount){
+            note_timingposx = notelist[note_number][0];
         }
     }
 
@@ -137,6 +186,7 @@ public class GameMaker : MonoBehaviour
         time4sec = 240*beats/bpm; //4小節終わるまでの時間
         onteitani = onteiba/gamescreenx; //これにタイムデルタしたらちょうどよくなるはず
         score_display = GameObject.Find("Score").GetComponent<TMP_Text>();
+        debug_display = GameObject.Find("debugtext").GetComponent<TMP_Text>();
         Notelistmaker(ref notescript.notes_timingposx_list);
     }
     public void SetFps(int fps){
@@ -150,7 +200,7 @@ public class GameMaker : MonoBehaviour
         gamecontrols.Player.Jumpboth.performed += OnJumpboth;
         gamecontrols.Player.Jumpboth.canceled += OnJumpboth;
         gamecontrols.Enable();
-        InputSystem.pollingFrequency = 121;
+        InputSystem.pollingFrequency = setfpsvalue*2+1;
     }
     private void OnDestroy()
     {
@@ -301,72 +351,190 @@ public class GameMaker : MonoBehaviour
     //音程に関するスコア加点
     void Score_ontei(){
         //音程が1音ずれまではnormal、2音以上でbad
-        //音を鳴らせてない場合はgood判定以上空いたらbad判定に
+        //音を鳴らせてない場合はsafe_ms判定以上空いたらbad判定に
+        //判定はnosing_timeに+deltaTimeでやってみる
+        if(zunda_singnow){
+            nosing_time = 0;
+            if(note_ontei>=0){
+                if(selectsound==note_ontei){
+
+                    score_ontei_sum += add_good_onteiScore;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.green;
+                    ontei_hantei = 0;
+
+                }else if(selectsound-1==note_ontei||selectsound+1==note_ontei){
+
+                    score_ontei_sum += add_safe_onteiScore;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.yellow;
+                    ontei_hantei = 1;
+
+                }else{
+
+                    score_ontei_sum += add_bad_onteiScore;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.red;
+                    ontei_hantei = 2;
+
+                }
+            }
+        }else{
+        //歌ってないときの判定
+        //休符ではないなら時間をカウントし、一定時間になったらnosingのスコアを適用
+        //休符の時はカウント用の変数をリセット
+            if(note_ontei>=0){
+                nosing_time += Time.deltaTime;
+                if(nosing_time>nosing_safetime){
+                    score_ontei_sum += add_nosing_onteiScore;
+                    ontei_hantei = 3;
+                }
+            }else{
+                nosing_time = 0;
+            }
+        }
     }
 
     //タイミングに関するスコア加点
     void Score_timing(){
-        //これ以上noteのlistがない場合タイミングに関する判定はまだないのでスルー
+        /*
+            使用する値
+            jump_posx:生成された発声バーのx座標
+            note_timingposx:次の判定のx座標
+            judge_*:good、safe、bad判定の許容時間(1なら1秒　音ゲーの良判定は基本+-33msとかで調整)
+            notelist[][]:画面上に生成されているノーツ情報の2次元List　note.csからlistを参照渡しで受け取っている(noteMaker())
+            notelist[][0]がnote_timingposx、[1]が音程
+        */
         Debug.Log($"GameMaker:Start Score_timing");
         Debug.Log($"GameMaker:Judge_score posx is +- {onteiba/time4sec * Judge_score_timing_good},{onteiba/time4sec * Judge_score_timing_safe},{onteiba/time4sec * Judge_score_timing_bad}");
-        Debug.Log($"jumpposx = {jumpposx}, note_timingposx = {note_timingposx}, note_ontei = {note_ontei}");
-        if(notenumber < notecount - 1){
-            if((jumpposx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_good)) && (jumpposx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_good))){
-                Debug.Log("GameMaker:Add_good_timingScore");
+        Debug.Log($"jump_posx = {jump_posx}, note_timingposx = {note_timingposx}, note_ontei = {note_ontei}");
+        if(note_number < notecount){
+            timing_karauchi = false;
+            if((jump_posx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_good)) && (jump_posx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_good))){
                 // ± onteiba/time4sec * Judge_score_timing_good がgood判定のx範囲
                 // タイミングがgoodの場合の処理をする
                 // note_onteiとnote_timingposxの更新
-                notenumber++;
-                note_ontei = notelist[notenumber][1];
-                if(notenumber < notecount - 1)note_timingposx = notelist[notenumber][0];
+                note_number++;
+                if(note_number < notecount)note_timingposx = notelist[note_number][0];
+                note_ontei = notelist[note_number-1][1];
                 //add_good_timingScoreスコア追加
                 if(note_ontei >= 0){
-                    score += add_good_timingScore;
+                    Debug.Log("GameMaker:Add_good_timingScore");
+                    score_timing_sum += add_good_timingScore;
+                    count_good_timing++;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.green;
+                    timing_hantei = 0;
                 }
-            }else if((jumpposx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_safe)) && (jumpposx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_safe))){
+            }else if((jump_posx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_safe)) && (jump_posx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_safe))){
                 // タイミングがsafeの場合の処理をする
                 // note_onteiとnote_timingposxの更新
-                Debug.Log("GameMaker:Add_safe_timingScore");
-                notenumber++;
-                note_ontei = notelist[notenumber][1];
-                if(notenumber < notecount - 1)note_timingposx = notelist[notenumber][0];
+                note_number++;
+                if(note_number < notecount)note_timingposx = notelist[note_number][0];
+                note_ontei = notelist[note_number-1][1];
                 //add_safe_timingScoreスコア追加
                 if(note_ontei >= 0){
-                    score += add_safe_timingScore;
+                    Debug.Log("GameMaker:Add_safe_timingScore");
+                    score_timing_sum += add_safe_timingScore;
+                    count_safe_timing++;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.yellow;
+                    timing_hantei = 1;
                 }
-            }else if((jumpposx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)) && (jumpposx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_bad))){
+            }else if((jump_posx <= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)) && (jump_posx >= note_timingposx - (onteiba/time4sec * Judge_score_timing_bad))){
                 // タイミングが悪い場合の処理をする
                 // note_onteiとnote_timingposxの更新
-                Debug.Log("GameMaker:Add_safe_timingScore");
-                notenumber++;
-                note_ontei = notelist[notenumber][1];
-                if(notenumber < notecount - 1)note_timingposx = notelist[notenumber][0];
+                
+                note_number++;
+                if(note_number < notecount)note_timingposx = notelist[note_number][0];
+                note_ontei = notelist[note_number-1][1];
                 //add_bad_timingScoreスコア追加
                 if(note_ontei >= 0){
-                    score += add_bad_timingScore;
+                    Debug.Log("GameMaker:Add_safe_timingScore");
+                    score_timing_sum += add_bad_timingScore;
+                    count_bad_timing++;
+                    nowbar.GetComponent<SpriteRenderer>().color = Color.red;
+                    timing_hantei = 2;
                 }
+            }else{
+                //badの範囲外の場合の判定はなし(から撃ちあり)
+                Debug.Log("GameMaker:NO_Add_good_timingScore");
+                timing_karauchi = true;
             }
-        //badの範囲外の場合の判定はなし(から撃ちあり)
-            Debug.Log("GameMaker:NO_Add_good_timingScore");
+        }else{
+            Debug.Log("GameMaker:note_number==notecount");
+            timing_karauchi = true;
         }
-        Debug.Log($"GameMaker:notenumber = {notenumber}, notecount = {notecount}");
+        Debug.Log($"GameMaker:note_number = {note_number}, notecount = {notecount}");
     }
 
     //ノーツをタップせずスルーした場合
     //badの範囲外に出たとき専用に呼ばれる(これ作る必要ないかも)
     void Score_timing_pass(){
-        if(notenumber < notecount-1){
+        if(note_number < notecount){
             // note_onteiとnote_timingposxの更新
-            notenumber++;
-            note_ontei = notelist[notenumber][1];
-            if(notenumber < notecount - 1)note_timingposx = notelist[notenumber][0];
+            note_number++;
+            note_ontei = notelist[note_number-1][1];
+            if(note_number < notecount)note_timingposx = notelist[note_number][0];
             if(note_ontei >= 0){
-                score += add_bad_timingScore;
+                score_timing_sum += add_bad_timingScore;
+                count_pass_timing++;
+                Debug.Log("Score_timign_pass");
+                timing_hantei = 3;
             }
         }
-        Debug.Log("Score_timign_pass");
     }
 
+    void Zunda_joutai_change(){
+        if(score>face_good_score){
+            zunda_joutai = 0;
+        }else if(score>face_normal_score){
+            zunda_joutai = 1;
+        }else if(score>face_nogood_score){
+            zunda_joutai = 2;
+        }else if(score>face_bad_score){
+            zunda_joutai = 3;
+        }
+    }
+
+    void DebugTextdisplay(){
+        debug_display.text = $"jump_posx:{jump_posx.ToString("f4")}\n";
+        debug_display.text += $"note_timingposx:{note_timingposx.ToString("f4")}\n";
+        debug_display.text += $"note_uptimingposx:{note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)}\n";
+        debug_display.text += $"note_dwtimingposx:{note_timingposx - (onteiba/time4sec * Judge_score_timing_bad)}\n";
+        debug_display.text += $"note_number:{note_number}, notecount:{notecount}\n";
+        debug_display.text += $"good:{count_good_timing},safe:{count_safe_timing},bad:{count_bad_timing},pass:{count_pass_timing}\n";
+        switch(timing_hantei){
+            case 0:
+                debug_display.text += "timing_hantei = good\n";
+                break;
+            case 1:
+                debug_display.text += "timing_hantei = safe\n";
+                break;
+            case 2:
+                debug_display.text += "timing_hantei = bad\n";
+                break;
+            case 3:
+                debug_display.text += "timing_hantei = pass\n";
+                break;
+            default:
+                break;
+        }
+        if(timing_karauchi)debug_display.text += "karauchi\n";
+        else debug_display.text += "No karauchi\n";
+        debug_display.text += $"note_ontei = {note_ontei}";
+        switch(ontei_hantei){
+            case 0:
+                debug_display.text += "ontei_hantei = good\n";
+                break;
+            case 1:
+                debug_display.text += "ontei_hantei = safe\n";
+                break;
+            case 2:
+                debug_display.text += "ontei_hantei = bad\n";
+                break;
+            case 3:
+                debug_display.text += "ontei_hantei = plz sing!\n";
+                break;
+            default:
+                break;
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -409,7 +577,7 @@ public class GameMaker : MonoBehaviour
                 zunda_singnow = true;
                 zunda_speak = true;
                 //jumpが押された瞬間のxをカウント、ノーツと比べてタイミング判定を行う
-                jumpposx = karaokebarpos.x;
+                jump_posx = karaokebarpos.x;
                 Score_timing();
             }else{
                 zundavoice_AS.Stop();
@@ -430,24 +598,39 @@ public class GameMaker : MonoBehaviour
         karaokeloc.transform.position = new Vector3(karaokebarpos.x,karaokelocy,karaokebarpos.z-3f);
 
         //スコア関連_タップ忘れ確認
-        if(karaokebarpos.x >= note_timingposx - (onteiba/time4sec * Judge_score_timing_bad)){
+        if(karaokebarpos.x >= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)){
             Score_timing_pass();
         }
-        score_display.text =  $"Score:{score}";
+        //Score_onteiは毎回呼ぶがdestroybarがtrueの時はnote生成を待つためLateに回す
+        if(!destroybar)Score_ontei();
+        score = score_timing_sum + score_ontei_sum;
+        Zunda_joutai_change();
+
+        score_display.text =  $"Timing:{score_timing_sum.ToString("f1")} ontei:{score_ontei_sum.ToString("f4")}\n";
+        score_display.text += $"Score:{score.ToString("f4")}\n";
+        if(notescript.musicend==true){
+            score_display.text += "Music End";
+        }else{
+            score_display.text += "Music now";
+        }
+
+        //debug用
+        DebugTextdisplay();
+    
     }
     void LateUpdate(){
         //新しく生成されたノーツのデータと、jumpを押し続けていた場合の処理
         if(destroybar){
             Notelistmaker(ref notescript.notes_timingposx_list);
             //destroybar直前に押したxの確認を行う
-            jumpposx -= gamescreenx;
-            Score_timing();
+            jump_posx -= gamescreenx;
             if(jump==1){
                 destroybar = false;
                 nowbar = Instantiate(greatbar, new Vector3(karaokebarpos.x, karaokelocy, -5), Quaternion.identity);
-                nowbar.GetComponent<SpriteRenderer>().color = Color.red;
-                //Score_ontei();
+                Score_ontei();
             }
+            //最後に押したもののチェック
+            Score_timing();
         }
     }
 }

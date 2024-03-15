@@ -30,6 +30,7 @@ public class note : MonoBehaviour
     bool noteend = false;
     bool songnow = false;
     bool notelongover = false;
+    public bool musicend = false;
 
     int i;
 
@@ -259,8 +260,14 @@ public class note : MonoBehaviour
         int song4syo = 256;
         while(song4syo != 0){
             int notelong = int.Parse(songdata[notenumbers,0]);
-            Debug.Log(notelong);
-            Debug.Log(song4syo);
+            if(noteend){
+                if(notelong<song4syo){
+                    Debug.Log("music end!!!");
+                    musicend = true;
+                    break;
+                }
+            }
+            Debug.Log($"notelong = {notelong}, song4syo = {song4syo}");
         //4小節に入る残りの容量より次のsongdataの長さが長い場合
             if(song4syo<notelong){
                 Debug.Log("song4syo<notelong");
@@ -273,7 +280,6 @@ public class note : MonoBehaviour
                     data.Add(-2);
                     notes_timingposx_list.Add(data);
                     noteend = true;
-                    break;
                 }else if (songdata[notenumbers, 1] == "-1"){
                     //タイミング計算用
                     List<float> data = new List<float>();
@@ -345,16 +351,20 @@ public class note : MonoBehaviour
             else
             {
                 //タイミング計算用
-                List<float> data = new List<float>();
-                data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
-                //-1は休符
-                data.Add(-1);
-                notes_timingposx_list.Add(data);
+                if(notelongover){
+                    notelongover = false;
+                }else{
+                    List<float> data = new List<float>();
+                    data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
+                    //-1をadd
+                    data.Add(-1);
+                    notes_timingposx_list.Add(data);
+                }
                 nownumbers = notenumbers;
                 notenumbers++;
                 song4syo -= notelong;
             }
-            Debug.Log(songdata[nownumbers,2]);
+            Debug.Log($"songdata[{nownumbers},2] = {songdata[nownumbers,2]}");
         }
         for(i=0;i<notes_timingposx_list.Count;++i){
             Debug.Log($"note:note_timingpos_list[{i}][0] = {notes_timingposx_list[i][0]}");
@@ -383,7 +393,7 @@ public class note : MonoBehaviour
                 nownotes.Clear();
             }
             
-            if(noteend==false)notemake();
+            notemake();
         }
     }
 }
