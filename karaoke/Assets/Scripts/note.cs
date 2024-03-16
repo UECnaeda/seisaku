@@ -27,7 +27,7 @@ public class note : MonoBehaviour
     float soundvalue = 30f;
     int nextnumbers;
     int nownumbers = 1;
-    bool noteend = false;
+    public bool noteend = false;
     bool songnow = false;
     bool notelongover = false;
     public bool musicend = false;

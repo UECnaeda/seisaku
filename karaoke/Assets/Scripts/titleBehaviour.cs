@@ -11,6 +11,7 @@ public class titleBehaviour : MonoBehaviour
     [SerializeField] Sprite first_sprite;
     [SerializeField] Sprite start_sprite;
     [SerializeField] Sprite option_sprite;
+    [SerializeField] Sprite exit_sprite;
     [SerializeField] Image panel;
     [SerializeField] Image zundatitle;
     [SerializeField] TMP_Text Option_text;
@@ -23,7 +24,7 @@ public class titleBehaviour : MonoBehaviour
     bool mode_option = false;
     byte color_option = 50;
     int option_select_number = 0;
-    int option_select_sum = 16;
+    int option_select_sum = 17;
     bool option_changevalue = false;
 
     //受け渡し値　staticおじさん
@@ -33,8 +34,8 @@ public class titleBehaviour : MonoBehaviour
     public static int delaytime = -5;
 
     public static float Judge_score_timing_good = 0.033f;
-    public static float Judge_score_timing_safe = 0.075f;
-    public static float Judge_score_timing_bad = 0.125f;
+    public static float Judge_score_timing_safe = 0.066f;
+    public static float Judge_score_timing_bad = 0.100f;
 
     public static float add_good_onteiScore = 0.01f;
     public static float add_safe_onteiScore = -0.01f;
@@ -44,7 +45,7 @@ public class titleBehaviour : MonoBehaviour
     public static float add_good_timingScore = 0.3f;
     public static float add_safe_timingScore = 0.05f;
     public static float add_bad_timingScore = -1;
-    public static int setfpsvalue = 60;
+    public static int setfpsvalue = 120;
 
     Vector2 moving;
     
@@ -155,8 +156,8 @@ public class titleBehaviour : MonoBehaviour
         delaytime = -5;
 
         Judge_score_timing_good = 0.033f;
-        Judge_score_timing_safe = 0.075f;
-        Judge_score_timing_bad = 0.125f;
+        Judge_score_timing_safe = 0.066f;
+        Judge_score_timing_bad = 0.100f;
 
         add_good_onteiScore = 0.01f;
         add_safe_onteiScore = -0.01f;
@@ -166,7 +167,7 @@ public class titleBehaviour : MonoBehaviour
         add_good_timingScore = 0.3f;
         add_safe_timingScore = 0.05f;
         add_bad_timingScore = -1;
-        setfpsvalue = 60;
+        setfpsvalue = 120;
         option_changevalue = false;
     }
 
@@ -245,6 +246,11 @@ public class titleBehaviour : MonoBehaviour
         }else{
             Option_text.text += "　オプションを閉じる\n";
         }
+        if(i==16){
+            Option_text.text += "<color=red>　ゲームを終了</color>\n";
+        }else{
+            Option_text.text += "　ゲームを終了\n";
+        }
     }
 
     void Option_finish(){
@@ -303,6 +309,10 @@ public class titleBehaviour : MonoBehaviour
                 //オプション閉じる
                 mode_option = false;
                 Option_finish();
+            }else if(i==16){
+                //ゲームを終了
+                Application.Quit();
+
             }
         }else{
             //上から1～14と設定したので数値増加を逆にしないといけない
@@ -321,15 +331,23 @@ public class titleBehaviour : MonoBehaviour
         if(mode_option){
             Option_behaviour();
         }else{
-            selectbutton = Moving_change_int(selectbutton,1);
-            if(selectbutton%2==0)panel.sprite = start_sprite;
-            else panel.sprite = option_sprite;
+            selectbutton = Moving_change_int(selectbutton,-1);
+            if(selectbutton<0)selectbutton += 3;
+            if(selectbutton%3==0){
+                panel.sprite = start_sprite;
+            }else if(selectbutton%3==1){
+                panel.sprite = option_sprite;
+            }else{
+                panel.sprite = exit_sprite;
+            }
             if(jump){
-                if(selectbutton%2==0){
+                if(selectbutton%3==0){
                     SceneManager.LoadScene("select_song");
-                }else{
+                }else if(selectbutton%3==1){
                     mode_option = true;
                     Option_start();
+                }else{
+                    Application.Quit();
                 }
             }
         }

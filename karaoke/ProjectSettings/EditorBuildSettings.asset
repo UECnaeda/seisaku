@@ -11,5 +11,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/otogame.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/select_song.unity
+    guid: 052e0820f75e9904b82bbbcea312484a
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 8f5e48896bc45a74b847be4eacf599e2, type: 2}

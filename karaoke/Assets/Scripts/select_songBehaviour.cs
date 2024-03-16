@@ -13,7 +13,7 @@ public class select_songBehaviour : MonoBehaviour
     [SerializeField] Image normal_no_select;
     [SerializeField] Image hard_no_select;
     [SerializeField] Image option_no_select;
-    public static int select_difficult = 0;
+    public static int select_difficult = 2;
     int select_difficult_sum = 4;
     int option_number = 3;
     bool option_hoge = false;

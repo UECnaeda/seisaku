@@ -369,9 +369,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 200f1736e94dabc4db0f83331bc4cbea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  first_sprite: {fileID: 21300000, guid: 2ea8da877378df94fbd3d0524237b8e5, type: 3}
-  start_sprite: {fileID: 21300000, guid: f40e923c61a03eb4c954908d054a3bbb, type: 3}
-  option_sprite: {fileID: 21300000, guid: 7a0a2ec91f0bd0b48903e3e1de1b302c, type: 3}
+  first_sprite: {fileID: 21300000, guid: 04394d3e6e5dc3f4cb2e86f42c8c5fed, type: 3}
+  start_sprite: {fileID: 21300000, guid: 430032baca84bd04093cd53db8332669, type: 3}
+  option_sprite: {fileID: 21300000, guid: 229166c863b1d684a8c9394a754f6618, type: 3}
+  exit_sprite: {fileID: 21300000, guid: ed4fe26d8a6eff745a76f997a565c36d, type: 3}
   panel: {fileID: 515408992}
   zundatitle: {fileID: 2109314382}
   Option_text: {fileID: 1100508320}
@@ -432,7 +433,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2ea8da877378df94fbd3d0524237b8e5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 04394d3e6e5dc3f4cb2e86f42c8c5fed, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -510,7 +511,7 @@ MonoBehaviour:
   m_text: "<color=yellow>\u97F3\u91CF\u8A2D\u5B9A</color>\n\u3000\u3000\u66F2(0\uFF5E5)\n\u3000\u3000\u58F0(0\uFF5E5)\n<color=yellow>\u5224\u5B9A\u8ABF\u6574</color>\n\u3000\u3000\u30BF\u30A4\u30DF\u30F3\u30B0\u8ABF\u6574(+\u3067\u5224\u5B9A\u9045\u3081)\n<color=yellow>\u5224\u5B9A\u6642\u9593(ms)</color>\n\u3000\u3000good:
     safe: bad:\n<color=yellow>\u30B9\u30B3\u30A2(\u97F3\u7A0B)</color>\n\u3000\u3000good:
     safe: \n\u3000\u3000bad: ignore: \n<color=yellow>\u30B9\u30B3\u30A2(\u30BF\u30A4\u30DF\u30F3\u30B0)</color>\n\u3000\u3000good:
-    safe: bad:\nFPS\n\u3000\u3000fps\u8A2D\u5B9A\n\n\u3000\u521D\u671F\u8A2D\u5B9A\u306B\u623B\u3059\n\u3000\u30AA\u30D7\u30B7\u30E7\u30F3\u3092\u9589\u3058\u308B\n\u3000\u3000\n\u3000\u3000\n"
+    safe: bad:\n<color=yellow>FPS</color>\n\u3000\u3000fps\u8A2D\u5B9A\n\n\u3000\u521D\u671F\u8A2D\u5B9A\u306B\u623B\u3059\n\u3000\u30AA\u30D7\u30B7\u30E7\u30F3\u3092\u9589\u3058\u308B\n\u3000\u30B2\u30FC\u30E0\u3092\u7D42\u4E86\n\u3000\u3000\n\u3000\u3000\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 044be33f5ce55ee4fa8b88c781d8af3d, type: 2}
   m_sharedMaterial: {fileID: -4669989509745462837, guid: 044be33f5ce55ee4fa8b88c781d8af3d, type: 2}
@@ -537,8 +538,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29
-  m_fontSizeBase: 29
+  m_fontSize: 27
+  m_fontSizeBase: 27
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
