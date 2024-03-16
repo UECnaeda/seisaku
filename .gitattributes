@@ -1,4 +1,4 @@
-* ## Unity ##
+# Unity
 *.cs diff=csharp text
 *.cginc text
 *.shader text
@@ -11,7 +11,7 @@
 *.asset merge=unityyamlmerge eol=lf
 *.meta merge=unityyamlmerge eol=lf
 *.controller merge=unityyamlmerge eol=lf
-## git-lfs ##
+#git-lfs
 #Image
 *.jpg !filter !diff !merge -text
 *.jpeg !filter !diff !merge -text
@@ -44,4 +44,4 @@
 *.rns !filter !diff !merge -text
 *.reason !filter !diff !merge -text
 *.lxo !filter !diff !merge -text
-karaoke/Library/PackageCache/com.unity.burst@1.8.12/.Runtime/libburst-llvm-16.dylib filter=lfs diff=lfs merge=lfs -text
+karaoke/assets/font/nikumaru[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text

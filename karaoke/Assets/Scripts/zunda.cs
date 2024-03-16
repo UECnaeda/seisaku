@@ -22,10 +22,6 @@ public class zunda : MonoBehaviour
         animator.SetFloat("Speed",(GameMaker.instance.bpm)/120);
     }
 
-    void zundajoutai_change(){
-        
-    }
-
     // Update is called once per frame
     void Update()
     {

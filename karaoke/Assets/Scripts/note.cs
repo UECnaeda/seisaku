@@ -251,6 +251,8 @@ public class note : MonoBehaviour
     {
         songdata = shiningstar;
         notemake();
+        songsound.volume = (float)(GameMaker.instance.volume_music)/10;
+        Debug.Log($"music = {songsound.volume}");
 
     }
     

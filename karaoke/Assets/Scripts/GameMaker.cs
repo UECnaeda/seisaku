@@ -12,7 +12,14 @@ public class GameMaker : MonoBehaviour
     public int setfpsvalue = 60;
     //ゲーム速度変化
     public float gamespeed = 1.0f;
-    //シングルトンにします　わけわからんかったらhttps://umistudioblog.com/singletonhowto/
+
+    //ゲームモード
+    public float select_difficult = 2;
+
+    //デバッグモード
+    public bool score_mode = true;
+    public bool debug_mode = true;
+    //シングルトン　わけわからんかったらhttps://umistudioblog.com/singletonhowto/
     public static GameMaker instance;
     /*
         画面サイズ…xが-8.85～8.85
@@ -73,18 +80,18 @@ public class GameMaker : MonoBehaviour
 
     //スコア計算用
 
-    public float score_ontei_sum = 50;
-    public float score_timing_sum = 50;
+    public float score_ontei_sum = 40;
+    public float score_timing_sum = 40;
     public float score = 0;
 
-    float add_good_timingScore = 0.3f;
-    float add_safe_timingScore = 0.05f;
-    float add_bad_timingScore = -1;
+    public float add_good_timingScore = 0.3f;
+    public float add_safe_timingScore = 0.05f;
+    public float add_bad_timingScore = -1;
 
-    float add_good_onteiScore = 0.01f;
-    float add_safe_onteiScore = -0.01f;
-    float add_bad_onteiScore = -0.03f;
-    float add_nosing_onteiScore = -0.05f;
+    public float add_good_onteiScore = 0.01f;
+    public float add_safe_onteiScore = -0.01f;
+    public float add_bad_onteiScore = -0.03f;
+    public float add_nosing_onteiScore = -0.05f;
 
     public float nosing_safetime = 0.1f;
     public float nosing_time = 0f;
@@ -97,9 +104,9 @@ public class GameMaker : MonoBehaviour
     //ずんだの顔を変える用
 
     public float face_good_score = 100f;
-    public float face_normal_score = 80f;
-    public float face_nogood_score = 60f;
-    public float face_bad_score = 40f;
+    public float face_normal_score = 75f;
+    public float face_nogood_score = 50f;
+    public float face_bad_score = 25f;
 
     public int zunda_joutai = 0;
 
@@ -139,14 +146,17 @@ public class GameMaker : MonoBehaviour
 
     //バー
     Vector3 karaokebarpos;
-    public Slider soundslider;
-    public Sprite speak, mute;
-    public Image images;
+    public Slider scoreslider;
+    //バーの動きをどれだけ滑らかにするか
+    int slider_mag = 100;
+    //public Sprite speak, mute;
+    //public Image images;
 
     //音設定
     public AudioClip a3e, a3si,a4so, a4u, a5a, a5se, b3u, b4a, b5i, c4o, c4sa, c5e, c5si,c6u, d4e, d4si, d5so, d5u, e4u, e5a, f4o, f4sa, f5e, f5si, g3o, g3sa, g4e, g4si, g5so, g5u;
     public AudioSource zundavoice_AS;
-
+    public int volume_music;
+    public int volume_voice;
 
     void Notelistmaker(ref List<List<float>> NL){
         Debug.Log("GameMaker:Notelistmaker");
@@ -173,20 +183,27 @@ public class GameMaker : MonoBehaviour
             //インスタンスが複数存在しないように、既に存在していたら自身を消去する
             Destroy(gameObject);
         }
-        //FPSの初期設定　変えたいならinstance使う
+        Initial_Value();
         SetFps(setfpsvalue);
-        //karaokeloc = GameObject.Find("karaokeloc").GetComponent<GameObject>();
-        soundslider = GameObject.Find("Slider").GetComponent<Slider>();
+        //slider初期設定
+        scoreslider = GameObject.Find("Slider").GetComponent<Slider>();
+        scoreslider.maxValue = slider_mag*100;
         music = GameObject.Find("music");
         notescript = music.GetComponent<note>();
         zundavoice_AS = GetComponent<AudioSource>();
-        //publicなのでとりあえずここで設定する　関数外だとunityの値が有線される
-        bpm = 158;
-        beats = 4;
+        zundavoice_AS.volume = ((float)volume_voice)/10;
+        Debug.Log($"volume_voice = {volume_voice},ZAS.volume = {zundavoice_AS.volume}");
+        //bpm、beatsをとりあえずここで設定
         time4sec = 240*beats/bpm; //4小節終わるまでの時間
         onteitani = onteiba/gamescreenx; //これにタイムデルタしたらちょうどよくなるはず
         score_display = GameObject.Find("Score").GetComponent<TMP_Text>();
         debug_display = GameObject.Find("debugtext").GetComponent<TMP_Text>();
+        if(!score_mode){
+            score_display.text = "";
+        }
+        if(!debug_mode){
+            debug_display.text = "";
+        }
         Notelistmaker(ref notescript.notes_timingposx_list);
     }
     public void SetFps(int fps){
@@ -243,6 +260,39 @@ public class GameMaker : MonoBehaviour
         jumpbothcheck = true;
         jump = context.ReadValue<float>();
     }
+    void Initial_Value(){
+        //音量
+        volume_music = titleBehaviour.volume_music;
+        volume_voice = titleBehaviour.volume_voice;
+
+        //タイミング調整
+        delaytime = titleBehaviour.delaytime;
+
+        //判定時間(ms)
+        Judge_score_timing_good = titleBehaviour.Judge_score_timing_good;
+        Judge_score_timing_safe = titleBehaviour.Judge_score_timing_safe;
+        Judge_score_timing_bad = titleBehaviour.Judge_score_timing_bad;
+
+        //スコア(音程)
+        add_good_onteiScore = titleBehaviour.add_good_onteiScore;
+        add_safe_onteiScore = titleBehaviour.add_safe_onteiScore;
+        add_bad_onteiScore = titleBehaviour.add_bad_onteiScore;
+        add_nosing_onteiScore = titleBehaviour.add_nosing_onteiScore;
+
+        //スコア(タイミング)
+        add_good_timingScore = titleBehaviour.add_good_timingScore;
+        add_safe_timingScore = titleBehaviour.add_safe_timingScore;
+        add_bad_timingScore = titleBehaviour.add_bad_timingScore;
+        setfpsvalue = titleBehaviour.setfpsvalue;
+
+        //ゲームモード
+        select_difficult = select_songBehaviour.select_difficult;
+
+        //曲情報
+        bpm = 158;
+        beats = 4;
+    }
+
     void Sing()
     {   
         zundavoice_AS.Stop();//元々なってる音を止める;
@@ -480,6 +530,10 @@ public class GameMaker : MonoBehaviour
         }
     }
 
+    void Scoreslider_move(){
+        scoreslider.value = score*slider_mag;
+    }
+
     void Zunda_joutai_change(){
         if(score>face_good_score){
             zunda_joutai = 0;
@@ -492,7 +546,18 @@ public class GameMaker : MonoBehaviour
         }
     }
 
+    void ScoreTextdisplay(){
+        score_display.text =  $"Timing:{score_timing_sum.ToString("f1")} ontei:{score_ontei_sum.ToString("f4")}\n";
+        score_display.text += $"Score:{score.ToString("f4")}\n";
+        if(notescript.musicend==true){
+            score_display.text += "Music End";
+        }else{
+            score_display.text += "Music now";
+        }
+    }
+
     void DebugTextdisplay(){
+
         debug_display.text = $"jump_posx:{jump_posx.ToString("f4")}\n";
         debug_display.text += $"note_timingposx:{note_timingposx.ToString("f4")}\n";
         debug_display.text += $"note_uptimingposx:{note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)}\n";
@@ -556,7 +621,7 @@ public class GameMaker : MonoBehaviour
         //soundtime += Time.deltaTime;
         //selectsound = (int)((soundvalue-1)*(sing1+sing2+2)/4);//スティックの傾きから0～soundvalue-1の値を出す
         selectsound = (int)((soundvalue-1)*(sing1+1)/2);　///sing1だけでやるならこっち
-        soundslider.value = selectsound; //バーを動かす
+        Scoreslider_move(); //バーを動かす
         karaokebarpos = karaokebar.transform.position;//karaokebarを動かす　白いやつ
         if(waitstart>=delaytime){
 
@@ -573,7 +638,7 @@ public class GameMaker : MonoBehaviour
         if(jumpbothcheck){
             if(jump==1){
                 Sing();
-                images.sprite = speak;
+                //images.sprite = speak;
                 zunda_singnow = true;
                 zunda_speak = true;
                 //jumpが押された瞬間のxをカウント、ノーツと比べてタイミング判定を行う
@@ -581,7 +646,7 @@ public class GameMaker : MonoBehaviour
                 Score_timing();
             }else{
                 zundavoice_AS.Stop();
-                images.sprite = mute;
+                //images.sprite = mute;
                 nowbar = null;
                 zunda_singnow = false;
             }
@@ -606,16 +671,17 @@ public class GameMaker : MonoBehaviour
         score = score_timing_sum + score_ontei_sum;
         Zunda_joutai_change();
 
-        score_display.text =  $"Timing:{score_timing_sum.ToString("f1")} ontei:{score_ontei_sum.ToString("f4")}\n";
-        score_display.text += $"Score:{score.ToString("f4")}\n";
-        if(notescript.musicend==true){
-            score_display.text += "Music End";
-        }else{
-            score_display.text += "Music now";
-        }
-
         //debug用
-        DebugTextdisplay();
+        if(score_mode){
+            ScoreTextdisplay();
+        }else{
+            score_display.text = "";
+        }
+        if(debug_mode){
+            DebugTextdisplay();
+        }else{
+            debug_display.text = "";
+        }
     
     }
     void LateUpdate(){

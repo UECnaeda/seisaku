@@ -80,6 +80,24 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""c67ca516-c1ae-478a-aee6-40e30ac6d79d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Tap"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Movehold"",
+                    ""type"": ""Value"",
+                    ""id"": ""9fea5b8a-9ce8-4b3f-9057-b92690df808f"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": ""Hold"",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -258,6 +276,94 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
                     ""action"": ""Jumprelease"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4f823f16-f837-42ef-b973-7553dbc90e5b"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f482c939-d35d-47fe-a15a-25ea0580aea6"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""ee48e05c-15b1-4e84-a5d6-b6ffe260f42c"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""26808495-4724-45c7-8433-5702af2f990a"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""3733faae-19e4-4732-aac9-02f972fa58fe"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""9cac0e52-52b0-4de6-8767-d2bcc80f671b"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""ad96c4cb-9163-4088-aed0-30b121a8397a"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0f3775cc-a9e1-4e23-84e1-15ffa83b1c84"",
+                    ""path"": ""<Gamepad>/dpad"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movehold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -272,6 +378,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         m_Player_Jumppress = m_Player.FindAction("Jumppress", throwIfNotFound: true);
         m_Player_Jumpboth = m_Player.FindAction("Jumpboth", throwIfNotFound: true);
         m_Player_Jumprelease = m_Player.FindAction("Jumprelease", throwIfNotFound: true);
+        m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Movehold = m_Player.FindAction("Movehold", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -339,6 +447,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jumppress;
     private readonly InputAction m_Player_Jumpboth;
     private readonly InputAction m_Player_Jumprelease;
+    private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Movehold;
     public struct PlayerActions
     {
         private @Gamecontrols m_Wrapper;
@@ -349,6 +459,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         public InputAction @Jumppress => m_Wrapper.m_Player_Jumppress;
         public InputAction @Jumpboth => m_Wrapper.m_Player_Jumpboth;
         public InputAction @Jumprelease => m_Wrapper.m_Player_Jumprelease;
+        public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Movehold => m_Wrapper.m_Player_Movehold;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -376,6 +488,12 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
             @Jumprelease.started += instance.OnJumprelease;
             @Jumprelease.performed += instance.OnJumprelease;
             @Jumprelease.canceled += instance.OnJumprelease;
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
+            @Movehold.started += instance.OnMovehold;
+            @Movehold.performed += instance.OnMovehold;
+            @Movehold.canceled += instance.OnMovehold;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -398,6 +516,12 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
             @Jumprelease.started -= instance.OnJumprelease;
             @Jumprelease.performed -= instance.OnJumprelease;
             @Jumprelease.canceled -= instance.OnJumprelease;
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
+            @Movehold.started -= instance.OnMovehold;
+            @Movehold.performed -= instance.OnMovehold;
+            @Movehold.canceled -= instance.OnMovehold;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -423,5 +547,7 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         void OnJumppress(InputAction.CallbackContext context);
         void OnJumpboth(InputAction.CallbackContext context);
         void OnJumprelease(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
+        void OnMovehold(InputAction.CallbackContext context);
     }
 }
