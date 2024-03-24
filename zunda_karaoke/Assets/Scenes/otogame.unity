@@ -1694,6 +1694,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: haikei
       objectReference: {fileID: 0}
+    - target: {fileID: 1732368009207742255, guid: 64105c553e5907349baf81f752983a73, type: 3}
+      propertyPath: m_Color.a
+      value: 0.39215687
+      objectReference: {fileID: 0}
     - target: {fileID: 2061468268392879563, guid: 64105c553e5907349baf81f752983a73, type: 3}
       propertyPath: m_RootOrder
       value: 6

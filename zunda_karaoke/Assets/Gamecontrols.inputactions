@@ -190,6 +190,17 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "",
+                    "id": "19f131aa-dd72-4947-85eb-66d23dd590d1",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jumppress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
                     "name": "1D Axis",
                     "id": "9f16b49f-cc2c-42f6-ab27-8098072e3c74",
                     "path": "1DAxis",
@@ -249,6 +260,17 @@
                     "id": "eb47916f-1d99-42fc-85ba-78f9e1be6deb",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jumprelease",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7eba64ee-46d7-4231-bb72-203e38ffe481",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Jumprelease",
