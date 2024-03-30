@@ -13,6 +13,10 @@ public class select_songBehaviour : MonoBehaviour
     [SerializeField] Image normal_no_select;
     [SerializeField] Image hard_no_select;
     [SerializeField] Image option_no_select;
+    [SerializeField] AudioSource AS_zunda_voice;
+    [SerializeField] AudioClip AC_easy;
+    [SerializeField] AudioClip AC_normal;
+    [SerializeField] AudioClip AC_hard;
     public static int select_difficult = 2;
     int select_difficult_sum = 4;
     int option_number = 3;
@@ -33,6 +37,10 @@ public class select_songBehaviour : MonoBehaviour
     private void OnEnable()
     {
         gamecontrols = new Gamecontrols();
+        var keyboard = Keyboard.current;
+        if(keyboard!=null){
+            keyboard.onTextInput += OnTextInput;
+        }
         gamecontrols.Player.Move.started += OnMove;
         gamecontrols.Player.Move.canceled += OnMove;
         gamecontrols.Player.Jumppress.performed += OnJumppress;
@@ -45,9 +53,15 @@ public class select_songBehaviour : MonoBehaviour
         gamecontrols.Player.Move.started -= OnMove;
         gamecontrols.Player.Move.canceled -= OnMove;
         gamecontrols.Player.Jumpboth.performed -= OnJumppress;
+        var keyboard = Keyboard.current;
+        if(keyboard != null)keyboard.onTextInput -= OnTextInput;
         gamecontrols.Dispose();
     }
-
+    private void OnTextInput(char ch)
+    {
+        // 入力された文字を文字コード（16進数）と共に表示
+        print($"OnTextInput: {ch}({(int) ch:X02})");
+    }
     void OnMove(InputAction.CallbackContext context)
     {
         if(context.started){
@@ -66,12 +80,31 @@ public class select_songBehaviour : MonoBehaviour
         jump = true;
     }
 
+    void zunda_voice_changedifficult(int a){
+        int b = a% select_difficult_sum;
+        if(b==0){
+            AS_zunda_voice.Stop();
+            AS_zunda_voice.PlayOneShot(AC_easy);
+        }else if(b==1){
+            AS_zunda_voice.Stop();
+            AS_zunda_voice.PlayOneShot(AC_normal);
+        }else if(b==2){
+            AS_zunda_voice.Stop();
+            AS_zunda_voice.PlayOneShot(AC_hard);
+        }else if(b==3){
+
+        }
+    }
+
     //select_difficultに合わせて表示を変更
     void Change_difficult(){
         easy_no_select.color = new Color32(255,255,255,210);
         normal_no_select.color = new Color32(255,255,255,210);
         hard_no_select.color = new Color32(255,255,255,210);
         option_no_select.color = new Color32(255,255,255,210);
+        if(onmove_started){
+            zunda_voice_changedifficult(select_difficult);
+        }
         if(select_difficult==0){
             easy_no_select.color = new Color32(255,255,255,0);
         }else if(select_difficult==1){

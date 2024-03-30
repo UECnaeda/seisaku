@@ -15,11 +15,30 @@ public class titleBehaviour : MonoBehaviour
     [SerializeField] Image panel;
     [SerializeField] Image zundatitle;
     [SerializeField] TMP_Text Option_text;
+    [SerializeField] private AudioSource zunda_voice;
+    [SerializeField] private AudioSource se;
+    [SerializeField] private AudioClip AC_zunda_change_timing;
+    [SerializeField] private AudioClip AC_zunda_changed;
+    [SerializeField] private AudioClip AC_zunda_changenow;
+    [SerializeField] private AudioClip AC_zunda_change_ms;
+    [SerializeField] private AudioClip AC_zunda_finish;
+    [SerializeField] private AudioClip AC_zunda_fps;
+    [SerializeField] private AudioClip AC_zunda_gameend;
+    [SerializeField] private AudioClip AC_zunda_kyoku_volume;
+    [SerializeField] private AudioClip AC_zunda_option;
+    [SerializeField] private AudioClip AC_zunda_reset;
+    [SerializeField] private AudioClip AC_zunda_score_ontei;
+    [SerializeField] private AudioClip AC_zunda_score_timing;
+    [SerializeField] private AudioClip AC_zunda_start;
+    [SerializeField] private AudioClip AC_zunda_voice_volume;
+
     //セレクトしているモードの管理
     int selectbutton = 0;
     bool titlesprite = true;
     bool jump = false;
     bool onmove_started = false;
+    int start_select_sum = 4;
+
     //option関連
     bool mode_option = false;
     byte color_option = 50;
@@ -57,6 +76,8 @@ public class titleBehaviour : MonoBehaviour
     float moving_holdtime2 = 2f;
     float holdtime = 0;
     int holdcount = 0;
+
+    //audio source
 
 
     Gamecontrols gamecontrols;
@@ -265,12 +286,16 @@ public class titleBehaviour : MonoBehaviour
 
     void Option_behaviour(){
         //option_select_numberでオプション選択管理
-        //項目が選ばれた時
         if(jump){
             option_changevalue = !option_changevalue;
         }
         if(option_changevalue){
             //選んでいる項目
+            //一度だけ選んでいる時のボイスを流す
+            if(jump){
+                zunda_voice.Stop();
+                zunda_voice.PlayOneShot(AC_zunda_changenow);
+            }
             int i = option_select_number % option_select_sum;
             if(i==0){
                 volume_music = Moving_change_int(volume_music,1)%11;
@@ -315,33 +340,99 @@ public class titleBehaviour : MonoBehaviour
 
             }
         }else{
+            if(jump){
+                zunda_voice.Stop();
+                zunda_voice.PlayOneShot(AC_zunda_changed);
+            }
             //上から1～14と設定したので数値増加を逆にしないといけない
             option_select_number = Moving_change_int(option_select_number,-1);
             if(option_select_number<0){
                 //number % sumがマイナスになると面倒なので
                 option_select_number += option_select_sum;
             }
+            //値が変化しているならずんだもんをしゃべらせる
+            if(onmove_started){
+                zunda_voice_forOption(option_select_number);
+            }
         }
         if(mode_option)Option_writetext();
+    }
+
+    //ずんだもんのボイス関連の操作
+    void zunda_voice_forStart(int a){
+        int b = a%start_select_sum;
+        if(b==0){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_start);
+        }else if(b==1){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_option);
+        }else if(b==2){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_gameend);
+        }
+    }
+
+    void zunda_voice_forOption(int a){
+        int b = a%option_select_sum;
+        if(b==0){
+            
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_kyoku_volume);
+        }else if(b==1){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_voice_volume);
+        }else if(b==2){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_change_timing);
+        }else if(b==3){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_change_ms);
+        }else if(b==6){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_score_ontei);
+        }else if(b==10){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_score_timing);
+        }else if(b==13){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_fps);
+        }else if(b==14){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_reset);
+        }else if(b==15){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_finish);
+        }else if(b==16){
+            zunda_voice.Stop();
+            zunda_voice.PlayOneShot(AC_zunda_gameend);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        //zunda_voice.volume = (float)volume_voice/10;
         if(mode_option){
+            //オプションモードかどうか
             Option_behaviour();
         }else{
+            //メニューモード
             selectbutton = Moving_change_int(selectbutton,-1);
-            if(selectbutton<0)selectbutton += 3;
-            if(selectbutton%3==0){
+            if(selectbutton<0)selectbutton += start_select_sum;
+            if(selectbutton%start_select_sum==0){
                 panel.sprite = start_sprite;
-            }else if(selectbutton%3==1){
+
+            }else if(selectbutton%start_select_sum==1){
                 panel.sprite = option_sprite;
             }else{
                 panel.sprite = exit_sprite;
             }
+            if(onmove_started){
+                zunda_voice_forStart(selectbutton%start_select_sum);
+            }
             if(jump){
-                if(selectbutton%3==0){
+                if(selectbutton%start_select_sum==0){
                     SceneManager.LoadScene("select_song");
                 }else if(selectbutton%3==1){
                     mode_option = true;

@@ -15,6 +15,7 @@ public class GameMaker : MonoBehaviour
     public float gamespeed = 1.0f;
 
     //ゲームモード
+    //0ならeasy、1ならnormal、2ならhard、3ならkeyboard
     public float select_difficult = 2;
 
     //normalモード用の変数　前の音程を記録しておく
@@ -174,6 +175,11 @@ public class GameMaker : MonoBehaviour
     [SerializeField] Image result_panel;
     int result_select = 0;
 
+    //キーボード操作用
+    bool keyboard_press = false;
+    char keyboard_input;
+    bool keyboard_press_before = false;
+
 
     void Notelistmaker(ref List<List<float>> NL){
         Debug.Log("GameMaker:Notelistmaker");
@@ -239,6 +245,12 @@ public class GameMaker : MonoBehaviour
         gamecontrols.Player.Move.performed += OnMove;
         gamecontrols.Player.Move.canceled += OnMove;
         gamecontrols.Enable();
+        /*
+        var keyboard = Keyboard.current;
+        if(keyboard!=null){
+            keyboard.onTextInput += OnTextInput;
+        }
+        */
         InputSystem.pollingFrequency = setfpsvalue*2+1;
     }
     private void OnDestroy()
@@ -253,31 +265,28 @@ public class GameMaker : MonoBehaviour
         gamecontrols.Player.Move.performed -= OnMove;
         gamecontrols.Player.Move.canceled -= OnMove;
         */
+        /*
+        var keyboard = Keyboard.current;
+        if(keyboard!=null){
+            keyboard.onTextInput -= OnTextInput;
+        }
+        */
         gamecontrols.Dispose();
     }
-
     /*
-    public void OnJumppress(InputAction.CallbackContext context)
-    {   
-        if (!context.performed) return;
-        Debug.Log("press");
-        Sing();
-        jump = context.ReadValue<float>();
-        images.sprite = speak;
-    }
-
-    // 離された瞬間のコールバック
-    public void OnJumprelease(InputAction.CallbackContext context)
-    {
-        if (!context.performed) return;
-        Debug.Log("release");
-        zundavoice_AS.Stop();
-        jump = context.ReadValue<float>();
-        images.sprite = mute;
-        nowbar = null;
+    void OnTextInput(char ch){
+        keyboard_press = true;
+        if(select_difficult==3){
+            if(!keyboard_press_before){
+                jumpbothcheck=true;
+                jump = 1;
+            }
+        }
+        if(keyboard_input!=ch){
+            keyboard_input = ch;
+        }
     }
     */
-
     void OnMove(InputAction.CallbackContext context)
     {
         if(context.started){
@@ -296,9 +305,13 @@ public class GameMaker : MonoBehaviour
     }
     void OnJumpboth(InputAction.CallbackContext context)
     {
-        jumpbothcheck = true;
-        jump = context.ReadValue<float>();
+        if(select_difficult!=3){
+            jumpbothcheck = true;
+            jump = context.ReadValue<float>();
+        }
     }
+    //初期化関連
+    //設定の値の適用などなど
     void Initial_Value(){
 
         //ゲームモード
@@ -367,6 +380,76 @@ public class GameMaker : MonoBehaviour
         result5_text.text = "";
     }
 
+    //キーボード操作
+    //難易度に応じて入力の値を変更する
+    //OnTextInputの仕様的にこれで継続入力は無理　長押ししても規定時間ごとに入力が繰り返されるタイプなので
+    void exchange_keyboardinput(){
+       print($"OnTextInput: {keyboard_input}({(int) keyboard_input:X02})");
+        if(select_difficult==3){
+            if(keyboard_input=='z'){
+                selectsound = 0;
+            }else if(keyboard_input=='x'){
+                selectsound = 1;
+            }else if(keyboard_input=='c'){
+                selectsound = 2;
+            }else if(keyboard_input=='v'){
+                selectsound = 3;
+            }else if(keyboard_input=='b'){
+                selectsound = 4;
+            }else if(keyboard_input=='n'){
+                selectsound = 5;
+            }else if(keyboard_input=='m'){
+                selectsound = 6;
+            }else if(keyboard_input==','){
+                selectsound = 7;
+            }else if(keyboard_input=='.'){
+                selectsound = 8;
+            }else if(keyboard_input=='/'){
+                selectsound = 9;
+            }else if(keyboard_input=='a'){
+                selectsound = 10;
+            }else if(keyboard_input=='s'){
+                selectsound = 11;
+            }else if(keyboard_input=='d'){
+                selectsound = 12;
+            }else if(keyboard_input=='f'){
+                selectsound = 13;
+            }else if(keyboard_input=='g'){
+                selectsound = 14;
+            }else if(keyboard_input=='h'){
+                selectsound = 15;
+            }else if(keyboard_input=='j'){
+                selectsound = 16;
+            }else if(keyboard_input=='k'){
+                selectsound = 17;
+            }else if(keyboard_input=='l'){
+                selectsound = 18;
+            }else if(keyboard_input==';'){
+                selectsound = 19;
+            }else if(keyboard_input=='q'){
+                selectsound = 20;
+            }else if(keyboard_input=='w'){
+                selectsound = 21;
+            }else if(keyboard_input=='e'){
+                selectsound = 22;
+            }else if(keyboard_input=='r'){
+                selectsound = 23;
+            }else if(keyboard_input=='t'){
+                selectsound = 24;
+            }else if(keyboard_input=='y'){
+                selectsound = 25;
+            }else if(keyboard_input=='u'){
+                selectsound = 26;
+            }else if(keyboard_input=='i'){
+                selectsound = 27;
+            }else if(keyboard_input=='o'){
+                selectsound = 28;
+            }else if(keyboard_input=='p'){
+                selectsound = 29;
+            }
+        }
+    }
+
     //normalの処理がちょっとややこしいので個別で関数を作る
     //note_onteiの値が更新されるタイミングで呼ぶ
     void normal_change_ontei(){
@@ -413,8 +496,17 @@ public class GameMaker : MonoBehaviour
             //hardモード、コントローラー、スティック1本
             //音程はダイレクトに変化する
             selectsound = (int)((soundvalue-1)*(moving.y+1)/2);
+        }else if(select_difficult==3){
+            //keyboardモード
+            //バグだらけ、要修正
+            exchange_keyboardinput();
+            if(keyboard_press_before){
+                if(!keyboard_press){
+                    jumpbothcheck=true;
+                    jump = 0;
+                }
+            }
         }
-        
     }
 
     void Sing()
@@ -699,6 +791,7 @@ public class GameMaker : MonoBehaviour
         }
     }
 
+    //デバッグ用
     void ScoreTextdisplay(){
         score_display.text =  $"Timing:{score_timing_sum.ToString("f1")} ontei:{score_ontei_sum.ToString("f4")}\n";
         score_display.text += $"Score:{score.ToString("f4")}\n";
@@ -757,6 +850,7 @@ public class GameMaker : MonoBehaviour
         debug_display.text += $"moving.y = {moving.y}";
     }
 
+    //resultを出力
     void Resultdisplay(){
         result_panel.color = new Color32(0,0,0,210);
         result1_text.text = "あなたの得点は";
@@ -890,6 +984,12 @@ public class GameMaker : MonoBehaviour
         }
         if(jumpbothcheck){
             jumpbothcheck = false;
+        }
+        if(keyboard_press){
+            keyboard_press = false;
+            keyboard_press_before = true;
+        }else{
+            keyboard_press_before = false;
         }
         //karaokelocを動かす　赤い奴
         karaokebarpos = karaokebar.transform.position;
