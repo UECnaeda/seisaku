@@ -386,15 +386,12 @@ public class note : MonoBehaviour
         //•ˆ–Ê‚Å‚«‚½‚ç‘S•”‰ó‚µ‚Ä‘S•”ì‚é
         //4¬ß•ª¶¬‚µ‚Ä‚¢‚­—\’è‚Å‚·‚ªc
         if(GameMaker.instance.destroybar){
-            if (nownotes != null)
-            {
-                foreach (GameObject obj in nownotes)
-                {
+            if (nownotes != null){
+                foreach (GameObject obj in nownotes){
                     Destroy(obj);
                 }
                 nownotes.Clear();
             }
-            
             notemake();
         }
     }

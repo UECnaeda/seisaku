@@ -98,6 +98,24 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Jumpboth2"",
+                    ""type"": ""Button"",
+                    ""id"": ""130d339e-c2c0-4b2d-87b4-6556d48ab8a3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Start"",
+                    ""type"": ""Button"",
+                    ""id"": ""290abb18-706b-41d2-9e12-a145cbf7c92b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -269,7 +287,7 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""cb3c44fc-d9f4-4e37-b75f-625f16080655"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""path"": ""<Keyboard>/j"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -386,6 +404,50 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
                     ""action"": ""Movehold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cef06cfa-3883-4395-86f9-4613b0b20319"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jumpboth2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ec990294-596b-4a12-a4e9-f9bf94910a00"",
+                    ""path"": ""<Keyboard>/k"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jumpboth2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""adb884f9-59e8-4651-b286-88b59ee91319"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Start"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""eedc3676-b822-44bd-b80d-e996e5e84562"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Start"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -402,6 +464,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         m_Player_Jumprelease = m_Player.FindAction("Jumprelease", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Movehold = m_Player.FindAction("Movehold", throwIfNotFound: true);
+        m_Player_Jumpboth2 = m_Player.FindAction("Jumpboth2", throwIfNotFound: true);
+        m_Player_Start = m_Player.FindAction("Start", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -471,6 +535,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jumprelease;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Movehold;
+    private readonly InputAction m_Player_Jumpboth2;
+    private readonly InputAction m_Player_Start;
     public struct PlayerActions
     {
         private @Gamecontrols m_Wrapper;
@@ -483,6 +549,8 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         public InputAction @Jumprelease => m_Wrapper.m_Player_Jumprelease;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputAction @Movehold => m_Wrapper.m_Player_Movehold;
+        public InputAction @Jumpboth2 => m_Wrapper.m_Player_Jumpboth2;
+        public InputAction @Start => m_Wrapper.m_Player_Start;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -516,6 +584,12 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
             @Movehold.started += instance.OnMovehold;
             @Movehold.performed += instance.OnMovehold;
             @Movehold.canceled += instance.OnMovehold;
+            @Jumpboth2.started += instance.OnJumpboth2;
+            @Jumpboth2.performed += instance.OnJumpboth2;
+            @Jumpboth2.canceled += instance.OnJumpboth2;
+            @Start.started += instance.OnStart;
+            @Start.performed += instance.OnStart;
+            @Start.canceled += instance.OnStart;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -544,6 +618,12 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
             @Movehold.started -= instance.OnMovehold;
             @Movehold.performed -= instance.OnMovehold;
             @Movehold.canceled -= instance.OnMovehold;
+            @Jumpboth2.started -= instance.OnJumpboth2;
+            @Jumpboth2.performed -= instance.OnJumpboth2;
+            @Jumpboth2.canceled -= instance.OnJumpboth2;
+            @Start.started -= instance.OnStart;
+            @Start.performed -= instance.OnStart;
+            @Start.canceled -= instance.OnStart;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -571,5 +651,7 @@ public partial class @Gamecontrols: IInputActionCollection2, IDisposable
         void OnJumprelease(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnMovehold(InputAction.CallbackContext context);
+        void OnJumpboth2(InputAction.CallbackContext context);
+        void OnStart(InputAction.CallbackContext context);
     }
 }

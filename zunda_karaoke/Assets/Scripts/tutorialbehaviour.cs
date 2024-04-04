@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
 
-public class GameMaker : MonoBehaviour
+public class tutorialbehaviour : MonoBehaviour
 {
     //fps
     public int setfpsvalue = 60;
@@ -25,15 +25,13 @@ public class GameMaker : MonoBehaviour
     //デバッグモード
     public bool score_mode = true;
     public bool debug_mode = true;
-    //シングルトン　わけわからんかったらhttps://umistudioblog.com/singletonhowto/
-    public static GameMaker instance;
     /*
         画面サイズ…xが-8.85～8.85
     */
     float gamescreenx = 17.7f;
     public float bpm = 158;
     public float beats = 4;
-    public float time4sec;
+    float time4sec;
 
     //input system、配置数値関連
     float sing1,sing2;
@@ -45,7 +43,7 @@ public class GameMaker : MonoBehaviour
     int maxsound = 29;
     int beforesound = 30;
     float soundtime = 0;
-    public float onteiba = 18.1f; //音程の奴の最大横幅
+    float onteiba = 18.1f; //音程の奴の最大横幅
     float onteitani; //バーの移動と音程の奴の大きさをインタラクトさせるための単位
     Gamecontrols gamecontrols;
     Vector2 moving;
@@ -187,13 +185,6 @@ public class GameMaker : MonoBehaviour
     char keyboard_input;
     bool keyboard_press_before = false;
 
-    //追加オプション用
-
-    //赤いバーが動かないモード
-    public static bool karaokeloc_nomoving = false;
-    //ノーツじゃなくてバーが動くモード
-    public static bool realkaraoke = true;
-
 
     void Notelistmaker(ref List<List<float>> NL){
         Debug.Log("GameMaker:Notelistmaker");
@@ -208,20 +199,8 @@ public class GameMaker : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        //シングルトンの呪文　自分以外のinstanceが合ったらデストロイする
-        if (instance == null)
-        {
-            // 自身をインスタンスとする
-            instance = this;
-        }
-        else
-        {
-            //インスタンスが複数存在しないように、既に存在していたら自身を消去する
-            Destroy(gameObject);
-        }
         Initial_Value();
         SetFps(setfpsvalue);
-
         //slider初期設定
         scoreslider = GameObject.Find("Slider").GetComponent<Slider>();
         scoreslider.maxValue = slider_mag*100;
@@ -230,11 +209,10 @@ public class GameMaker : MonoBehaviour
         zundavoice_AS = GetComponent<AudioSource>();
         zundavoice_AS.volume = ((float)volume_voice)/10;
         Debug.Log($"volume_voice = {volume_voice},ZAS.volume = {zundavoice_AS.volume}");
-
-        //bpm、beatsをここで設定
+        //bpm、beatsをとりあえずここで設定
         time4sec = 240*beats/bpm; //4小節終わるまでの時間
         sec2count = time4sec;
-        onteitani = onteiba/gamescreenx; //これにタイムデルタしたらちょうどよくなる
+        onteitani = onteiba/gamescreenx; //これにタイムデルタしたらちょうどよくなるはず
         score_display = GameObject.Find("Score").GetComponent<TMP_Text>();
         debug_display = GameObject.Find("debugtext").GetComponent<TMP_Text>();
         if(!score_mode){
@@ -264,6 +242,12 @@ public class GameMaker : MonoBehaviour
         gamecontrols.Player.Jumpboth2.canceled += OnJumpboth2;
         gamecontrols.Player.Start.performed += OnStart;
         gamecontrols.Enable();
+        /*
+        var keyboard = Keyboard.current;
+        if(keyboard!=null){
+            keyboard.onTextInput += OnTextInput;
+        }
+        */
         InputSystem.pollingFrequency = setfpsvalue*2+1;
     }
     private void OnDestroy()
@@ -283,6 +267,20 @@ public class GameMaker : MonoBehaviour
         gamecontrols.Player.Start.performed -= OnStart;
         gamecontrols.Dispose();
     }
+    /*
+    void OnTextInput(char ch){
+        keyboard_press = true;
+        if(select_difficult==3){
+            if(!keyboard_press_before){
+                jumpbothcheck=true;
+                jump = 1;
+            }
+        }
+        if(keyboard_input!=ch){
+            keyboard_input = ch;
+        }
+    }
+    */
     void OnMove(InputAction.CallbackContext context)
     {
         if(context.started){
@@ -416,7 +414,6 @@ public class GameMaker : MonoBehaviour
         return a;
     }
 
-    /*
     //キーボード操作
     //難易度に応じて入力の値を変更する
     //OnTextInputの仕様的にこれで継続入力は無理　長押ししても規定時間ごとに入力が繰り返されるタイプなので
@@ -486,7 +483,6 @@ public class GameMaker : MonoBehaviour
             }
         }
     }
-    */
 
     //normalの処理がちょっとややこしいので個別で関数を作る
     //note_onteiの値が更新されるタイミングで呼ぶ
@@ -537,7 +533,7 @@ public class GameMaker : MonoBehaviour
         }else if(select_difficult==3){
             //keyboardモード
             //バグだらけ、要修正
-            //exchange_keyboardinput();
+            exchange_keyboardinput();
             if(keyboard_press_before){
                 if(!keyboard_press){
                     jumpbothcheck=true;
@@ -550,6 +546,7 @@ public class GameMaker : MonoBehaviour
     void Sing()
     {   
         zundavoice_AS.Stop();//元々なってる音を止める;
+        //Debug.Log("Singcall");
         switch(selectsound){
             case 0: 
                 zundavoice_AS.PlayOneShot(g3o);
@@ -645,20 +642,10 @@ public class GameMaker : MonoBehaviour
                 Debug.Log("Default??");
                 break;
         }
+        //Debug.Log(selectsound);
         karaokelocy = karaokebarloc-(karaokebarheight/2) + (karaokebarheight*(float)selectsound/soundvalue);
         nowbar = Instantiate(greatbar, new Vector3(karaokebarpos.x, karaokelocy, -5), Quaternion.identity);
         geneposx = karaokebarpos.x;
-    }
-
-    void Nowbar_moving(){
-        if(nowbar!=null){
-            if(realkaraoke){
-                nowbar.transform.localPosition += new Vector3(onteiba/time4sec*Time.deltaTime/2f,0f,0f);
-                nowbar.transform.localScale += new Vector3(onteiba/time4sec*Time.deltaTime,0f,0f);
-            }else{
-                nowbar.transform.localScale += new Vector3(onteiba/time4sec*Time.deltaTime,0f,0f);
-            }
-        }
     }
 
     //音程に関するスコア加点
@@ -813,7 +800,6 @@ public class GameMaker : MonoBehaviour
         }
     }
 
-    //スコアゲージの操作
     void Scoreslider_move(){
         scoreslider.value = score*slider_mag;
         if(score>face_good_score){
@@ -827,7 +813,6 @@ public class GameMaker : MonoBehaviour
         }
     }
 
-    //ずんだもんの状態を変化
     void Zunda_joutai_change(){
         if(score>face_good_score){
             zunda_joutai = 0;
@@ -840,7 +825,6 @@ public class GameMaker : MonoBehaviour
         }
     }
 
-    //テキスト表示のヘルプ用、色つけて選択することが多いので
     void Displaytext_selecthelper(string[] str, int a, TMP_Text t){
         t.text = "";
         for(int i=0;i<str.Length;i++){
@@ -1012,9 +996,8 @@ public class GameMaker : MonoBehaviour
                 Resultdisplay();
             }
         }
-        
-        //曲開始までちょっと待つ
         waitstart--;
+        //曲開始までちょっと待つ
         if(waitstart==0){
             gamespeed = 1f;
             musicstart = true;
@@ -1032,8 +1015,10 @@ public class GameMaker : MonoBehaviour
 
         //画面に生成される、歌った音程のバーをnowbarで管理
         //リアルタイムで動かす
-        Nowbar_moving();
-
+        if(nowbar!=null){
+            nowbar.transform.localPosition += new Vector3(onteiba/time4sec*Time.deltaTime/2f,0f,0f);
+            nowbar.transform.localScale += new Vector3(onteiba/time4sec*Time.deltaTime,0f,0f);
+        }
         //selectsoundの設定
         //先に設定したほうが良いか後に設定したほうが良いかで処理を分ける
         if(select_difficult>0){
@@ -1093,10 +1078,15 @@ public class GameMaker : MonoBehaviour
         if(jumpbothcheck){
             jumpbothcheck = false;
         }
-        //karaokelocを動かす　赤い奴
-        if(!karaokeloc_nomoving){
-            karaokelocy = karaokebarloc-(karaokebarheight/2) + (karaokebarheight*(float)selectsound/soundvalue);
+        /*
+        if(keyboard_press){
+            keyboard_press = false;
+            keyboard_press_before = true;
+        }else{
+            keyboard_press_before = false;
         }
+        */
+        //karaokelocを動かす　赤い奴
         karaokebarpos = karaokebar.transform.position;
         karaokeloc.transform.position = new Vector3(karaokebarpos.x,karaokelocy,karaokebarpos.z-3f);
 
@@ -1110,8 +1100,6 @@ public class GameMaker : MonoBehaviour
             Score_ontei();
         }
         Zunda_joutai_change();
-
-        //判定テキスト表示
         switch(timing_hantei){
             case 0:
                 hantei_display.text = "<color=green>good</color>\n";

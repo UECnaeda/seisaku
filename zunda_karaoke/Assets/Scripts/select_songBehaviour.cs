@@ -17,10 +17,21 @@ public class select_songBehaviour : MonoBehaviour
     [SerializeField] AudioClip AC_easy;
     [SerializeField] AudioClip AC_normal;
     [SerializeField] AudioClip AC_hard;
+    [SerializeField] Image tutorial_panel;
+    [SerializeField] TMP_Text tutorialtext1;
+    [SerializeField] TMP_Text tutorialtext2;
+
+    //結構遷移させるのでモード番号を管理
+    //難易度選択を0,チュートリアル選択を1とする
+    int select_thismode = 0;
     public static int select_difficult = 2;
     int select_difficult_sum = 4;
     int option_number = 3;
-    bool option_hoge = false;
+    int title_number = 3;
+    
+    //tutorial関連
+    string[] tutorial_words = {"はい","スキップ","曲選択に戻る"};
+    int select_tutorial = 0;
 
 
     //input system関連
@@ -37,10 +48,6 @@ public class select_songBehaviour : MonoBehaviour
     private void OnEnable()
     {
         gamecontrols = new Gamecontrols();
-        var keyboard = Keyboard.current;
-        if(keyboard!=null){
-            keyboard.onTextInput += OnTextInput;
-        }
         gamecontrols.Player.Move.started += OnMove;
         gamecontrols.Player.Move.canceled += OnMove;
         gamecontrols.Player.Jumppress.performed += OnJumppress;
@@ -53,14 +60,7 @@ public class select_songBehaviour : MonoBehaviour
         gamecontrols.Player.Move.started -= OnMove;
         gamecontrols.Player.Move.canceled -= OnMove;
         gamecontrols.Player.Jumpboth.performed -= OnJumppress;
-        var keyboard = Keyboard.current;
-        if(keyboard != null)keyboard.onTextInput -= OnTextInput;
         gamecontrols.Dispose();
-    }
-    private void OnTextInput(char ch)
-    {
-        // 入力された文字を文字コード（16進数）と共に表示
-        print($"OnTextInput: {ch}({(int) ch:X02})");
     }
     void OnMove(InputAction.CallbackContext context)
     {
@@ -116,28 +116,92 @@ public class select_songBehaviour : MonoBehaviour
         }
     }
 
-    int Moving_change_int_x(int a, int b){
+    int Moving_change_int_x(int a, int b, int c){
+        if(a<=0){
+            a+=c;
+        }
         if(onmove_started){
-            Debug.Log("onmove");
             if(moving.x>0){
                 a += b;
             }else{
                 a -= b;
             }
         }
-        return a;
+        return a % c;
     }
 
-    void Start_Option(){
-        
+    //aをbかcだけ増減させ、a%dを返す関数
+    //a<0ならa=a+dをあらかじめする
+    int Moving_change_int_xy(int a, int b,int c,int d){
+        if(a<=0){
+            a+= d;
+        }
+        if(onmove_started){
+            if(Mathf.Abs(moving.x)>Mathf.Abs(moving.y)){
+                if(moving.x>0){
+                    a += b;
+                }else{
+                    a -= b;
+                }
+            }else{
+                if(moving.y>0){
+                    a += c;
+                }else{
+                    a -= c;
+                }
+            }
+        }
+        return a % d;
+    }
+
+    //str[a]だけ赤くする用の関数
+    //出力は横一列
+    void Displaytext_selecthelper(string[] str, int a, TMP_Text t){
+        t.text = "";
+        for(int i=0;i<str.Length;i++){
+            if(i==a){
+                t.text += "<color=red>";
+                t.text += str[i];
+                t.text += "</color>";
+                t.text += "　";
+            }else{
+                t.text += str[i];
+                t.text += "　";
+            }
+        }
+
+    }
+
+    void Start_tutorial(){
+        tutorial_panel.color = new Color32(0,0,0,210);
+        select_tutorial = Moving_change_int_x(select_tutorial,1,3);
+        tutorialtext1.text = "チュートリアルをプレイしますか？(推奨)";
+        Displaytext_selecthelper(tutorial_words,select_tutorial,tutorialtext2);
+        if(jump){
+            if(select_tutorial==0){
+                SceneManager.LoadScene("tutorial");
+            }else if(select_tutorial==1){
+                SceneManager.LoadScene("otogame");
+            }else if(select_tutorial==2){
+                Initial_tutorial();
+                select_thismode--;
+            }
+        }
+    }
+
+    void Initial_tutorial(){
+        tutorial_panel.color = new Color32(255,255,255,0);
+        select_tutorial = 0;
+        tutorialtext1.text = "";
+        tutorialtext2.text = "";
     }
 
     //決定された時の挙動
     void Deside_difficult_mode(){
-        if(select_difficult==option_number){
-            Start_Option();
+        if(select_difficult==title_number){
+            SceneManager.LoadScene("title");
         }else{
-            SceneManager.LoadScene("otogame");
+            select_thismode++;
         }
     }
 
@@ -162,20 +226,25 @@ public class select_songBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        select_thismode = 0;
+        Initial_tutorial();
         
     }
 
     // Update is called once per frame
     void Update()
     {
-        select_difficult = Moving_change_int_x(select_difficult,1);
-        if(select_difficult<0){
-            select_difficult += select_difficult_sum;
-        }
-        select_difficult = select_difficult % select_difficult_sum;
-        Change_difficult();
-        if(jump){
-            Deside_difficult_mode();
+        if(select_thismode==0){
+            //難易度選択
+            select_difficult = Moving_change_int_xy(select_difficult,1,-2,select_difficult_sum);
+            Change_difficult();
+            if(jump){
+                Deside_difficult_mode();
+            }
+        }else if(select_thismode==1){
+            //チュートリアル選択画面
+
+            Start_tutorial();
         }
         //input system関連の値を更新
         Update_input_system_values();
