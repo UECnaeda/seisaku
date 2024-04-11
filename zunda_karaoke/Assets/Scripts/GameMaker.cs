@@ -30,7 +30,7 @@ public class GameMaker : MonoBehaviour
     /*
         画面サイズ…xが-8.85～8.85
     */
-    float gamescreenx = 17.7f;
+    public float gamescreenx = 17.7f;
     public float bpm = 158;
     public float beats = 4;
     public float time4sec;
@@ -91,6 +91,9 @@ public class GameMaker : MonoBehaviour
     float note_ontei = -1;
 
     //スコア計算用
+
+    const float init_score_ontei = 40;
+    const float init_score_timing = 40;
 
     public static float score_ontei_sum = 40;
     public static float score_timing_sum = 40;
@@ -192,7 +195,29 @@ public class GameMaker : MonoBehaviour
     //赤いバーが動かないモード
     public static bool karaokeloc_nomoving = false;
     //ノーツじゃなくてバーが動くモード
-    public static bool realkaraoke = true;
+    public static bool realkaraoke = false;
+    public float notemoving = 0f;
+    public float notemoving_before = 0f;
+
+    //チュートリアル用
+    public bool tutorialmode = false;
+    public int tutorial_phase = 0;
+    public static bool tutorialstart = false;
+    float tutorialtime_count = 0;
+    float tutorialtime_countstop = 0f;
+    int tutorial_select = 0;
+    bool tutorial_title = false;
+
+    [SerializeField] Sprite controller_fig;
+    [SerializeField] Sprite controller_singfig;
+    [SerializeField] Sprite controller_stickfig;
+    [SerializeField] Sprite controller_stickupfig;
+    [SerializeField] Sprite controller_stickdownfig;
+    [SerializeField] TMP_Text tutorial_text1;
+    [SerializeField] Image tutorial_panel;
+    [SerializeField] SpriteRenderer controller_image;
+    
+
 
 
     void Notelistmaker(ref List<List<float>> NL){
@@ -219,6 +244,12 @@ public class GameMaker : MonoBehaviour
             //インスタンスが複数存在しないように、既に存在していたら自身を消去する
             Destroy(gameObject);
         }
+        //一回しか呼びたくない初期化を記述
+        tutorialmode = select_songBehaviour.tutorialmode;
+        if(tutorialmode){
+            select_songBehaviour.tutorialmode = false;
+        }
+        tutorial_phase = 0;
         Initial_Value();
         SetFps(setfpsvalue);
 
@@ -231,9 +262,6 @@ public class GameMaker : MonoBehaviour
         zundavoice_AS.volume = ((float)volume_voice)/10;
         Debug.Log($"volume_voice = {volume_voice},ZAS.volume = {zundavoice_AS.volume}");
 
-        //bpm、beatsをここで設定
-        time4sec = 240*beats/bpm; //4小節終わるまでの時間
-        sec2count = time4sec;
         onteitani = onteiba/gamescreenx; //これにタイムデルタしたらちょうどよくなる
         score_display = GameObject.Find("Score").GetComponent<TMP_Text>();
         debug_display = GameObject.Find("debugtext").GetComponent<TMP_Text>();
@@ -243,7 +271,7 @@ public class GameMaker : MonoBehaviour
         if(!debug_mode){
             debug_display.text = "";
         }
-        
+        Debug.Log("notelistmaker");
         Notelistmaker(ref notescript.notes_timingposx_list);
     }
     public void SetFps(int fps){
@@ -324,6 +352,7 @@ public class GameMaker : MonoBehaviour
 
         //ゲームモード
         select_difficult = select_songBehaviour.select_difficult;
+        realkaraoke = select_songBehaviour.realkaraoke;
 
         //音量
         volume_music = titleBehaviour.volume_music;
@@ -365,19 +394,47 @@ public class GameMaker : MonoBehaviour
         //スコア合計
         if(select_difficult==0){
             score_ontei_sum = 0;
-            score_timing_sum = 60;
+            score_timing_sum = init_score_ontei + init_score_timing;
         }else{
-            score_ontei_sum = 40;
-            score_timing_sum = 40;
+            score_ontei_sum = init_score_ontei;
+            score_timing_sum = init_score_timing;
         }
+
+        //カラオケバーの位置
+        karaokebar.transform.position = new Vector3(0f,0.8f,-1f);
 
         //開幕待機時間
         //そのうちカウント入れたい
         waitstart = 90;
 
         //曲情報
-        bpm = 158;
-        beats = 4;
+        //select_songBehaviourの値を利用予定、要変更
+        if(tutorialmode){
+            bpm = 120;
+            beats = 4;
+        }else{
+            bpm = 158;
+            beats = 4;
+        }
+
+        //bpm、beatsをここで設定
+        time4sec = 240*beats/bpm; //4小節終わるまでの時間
+        sec2count = time4sec;
+        if(!realkaraoke)sec2count = sec2count / 4;
+
+        musicstart = false;
+
+        //チュートリアル系
+
+        tutorialtime_count = 0f;
+        tutorialtime_countstop = 0f;
+        tutorial_panel.color = new Color32(255,255,255,0);
+        controller_image.color = new Color32(255,255,255,0);
+        tutorial_text1.text ="";
+        tutorial_title = false;
+
+        notemoving = 0f;
+        notemoving_before = 0f;
 
         //result初期設定
         result_panel.color = new Color32(255,255,255,0);
@@ -413,6 +470,8 @@ public class GameMaker : MonoBehaviour
                 a -= b;
             }
         }
+        //onmove_startedをfalseにする
+        onmove_started = false;
         return a;
     }
 
@@ -646,7 +705,9 @@ public class GameMaker : MonoBehaviour
                 break;
         }
         karaokelocy = karaokebarloc-(karaokebarheight/2) + (karaokebarheight*(float)selectsound/soundvalue);
+        if(nowbar!=null)nowbar.GetComponent<greatline>().isnowbar = false;
         nowbar = Instantiate(greatbar, new Vector3(karaokebarpos.x, karaokelocy, -5), Quaternion.identity);
+        nowbar.GetComponent<greatline>().isnowbar = true;
         geneposx = karaokebarpos.x;
     }
 
@@ -915,6 +976,9 @@ public class GameMaker : MonoBehaviour
         debug_display.text += $"moving.y = {moving.y}";
         debug_display.text += $"jump,jump2 = {jump},";
         debug_display.text += $"{jump2}\n";
+        debug_display.text += $"notemoving = {notemoving}\n";
+        debug_display.text += $"noteend = {notescript.noteend}\n";
+        debug_display.text += $"time4sec,sec2count = {time4sec},{sec2count}\n";
     }
 
     //pauseを出力
@@ -923,7 +987,6 @@ public class GameMaker : MonoBehaviour
         result_panel.color = new Color32(0,0,0,210);
         result2_text.text = "Pause";
         pause_select = Moving_change_int_x(pause_select,1,3);
-        onmove_started = false;
         Displaytext_selecthelper(pause_words,pause_select%3,result5_text);
         if(jumpbothcheck){
             if(jump==1){
@@ -976,7 +1039,6 @@ public class GameMaker : MonoBehaviour
             result4_text.text = $"good:{count_good_timing} safe:{count_safe_timing}\n";
             result4_text.text += $"bad:{count_bad_timing} pass:{count_pass_timing}\n";
             result_select = Moving_change_int_x(result_select,1,3);
-            onmove_started = false;
             if(result_select%3==0){
                 result5_text.text = $"　<color=red>もう一度遊ぶ</color>　曲選択　タイトルに戻る";
             }else if(result_select%3==1){
@@ -998,18 +1060,159 @@ public class GameMaker : MonoBehaviour
         }
     }
 
+    void Tutorial_display(){
+        //tutorial曲が終わった場合
+        if(sec2count<-0.1f){
+            result_panel.color = new Color32(0,0,0,210);
+            gamespeed = 0f;
+            tutorial_select = Moving_change_int_x(tutorial_select,1,3);
+            if(tutorial_phase!=2){
+                //チュートリアルが続く場合
+                if(tutorial_select%3==0){
+                    result5_text.text = $"　<color=red>もう一度</color>　次へ進む　曲選択へ";
+                }else if(tutorial_select%3==1){
+                    result5_text.text = $"　もう一度　<color=red>次へ進む</color>　曲選択へ";
+                }else if(tutorial_select%3==2){
+                    result5_text.text = $"　もう一度　次へ進む　<color=red>曲選択へ</color>";
+                }
+            }else{
+                //チュートリアルが終わる場合
+                if(tutorial_select%3==0){
+                result5_text.text = $"　<color=red>もう一度</color>　チュートリアルを終了　曲選択へ";
+                }else if(tutorial_select%3==1){
+                    result5_text.text = $"　もう一度　<color=red>チュートリアルを終了</color>　曲選択へ";
+                }else if(tutorial_select%3==2){
+                    result5_text.text = $"　もう一度　チュートリアルを終了　<color=red>曲選択へ</color>";
+                }
+            }
+            if(jumpbothcheck){
+                if(jump==1){
+                    Initial_Value();
+                    if(tutorial_select%3==0){
+                        tutorialstart = true;
+                    }else if(tutorial_select%3==1){
+                        if(tutorial_phase<2){
+                            tutorial_phase++;
+                            tutorialstart = true;
+                        }else{
+                            tutorialmode = false;
+                            Initial_Value();
+                        }
+                    }else if(tutorial_select%3==2){
+                        SceneManager.LoadScene("select_song");
+                    }
+                    gamespeed = 1f;
+                }
+            } 
+        }else{
+            result1_text.text = $"チュートリアル{tutorial_phase+1}\n";
+            if(tutorial_phase==0){
+                result1_text.text += "歌い方";
+            }else if(tutorial_phase==1){
+                result1_text.text += "音程の変え方";
+            }else if(tutorial_phase==2){
+                result1_text.text += "練習してみよう！";
+            }
+        }
+    }
+
+    //チュートリアルの動き方
+    //文字表示と停止を追加
+    void Tutorial_behaviour(){
+        //チュートリアル最初に表示する奴
+        if(!tutorial_title){
+            gamespeed = 0f;
+            tutorialtime_countstop += Time.unscaledDeltaTime;
+            tutorial_panel.color = new Color32(0,0,0,210);
+            if(tutorial_phase==0){
+                controller_image.sprite = controller_singfig;
+                controller_image.color = new Color32(255,255,255,255);
+                tutorial_text1.text = $"赤いボタンを押すと\n歌います";
+            }else if(tutorial_phase==1){
+                controller_image.sprite = controller_stickfig;
+                controller_image.color = new Color32(255,255,255,255);
+                if(select_difficult==0){
+                    tutorial_text1.text = $"歌うと自動で\n音の高さが変わります";
+                }else if(select_difficult==1){
+                    tutorial_text1.text = $"スティックを上下すると\n音の高さが変わります";
+                }else if(select_difficult==2){
+                    tutorial_text1.text = $"スティックの傾き具合で\n音の高さが変わります";
+                }
+            }else if(tutorial_phase==2){
+                //controller_image.color = new Color32(255,255,255,0);
+                tutorialtime_countstop = 0;
+                tutorial_panel.color = new Color32(255,255,255,0);
+                tutorial_text1.text ="";
+                tutorial_title = true;
+                gamespeed = 1f;
+            }
+            if(tutorialtime_countstop>time4sec/2){
+                tutorialtime_countstop = 0;
+                //controller_image.color = new Color32(255,255,255,0);
+                tutorial_panel.color = new Color32(255,255,255,0);
+                tutorial_text1.text ="";
+                tutorial_title = true;
+                gamespeed = 1f;
+            }
+        }
+        tutorialtime_count += Time.deltaTime;
+        if(tutorial_phase==0){
+            //3小節目で止める
+            if(tutorialtime_count>time4sec/4){
+                if(tutorialtime_countstop<time4sec/2){
+                    gamespeed = 0f;
+                    tutorialtime_countstop += Time.unscaledDeltaTime;
+                    tutorial_panel.color = new Color32(0,0,0,210);
+                    tutorial_text1.text = $"黒いノーツが重なるタイミングに\n合わせて歌おう！";
+                }else{
+                    gamespeed = 1f;
+                    tutorial_panel.color = new Color32(255,255,255,0);
+                }
+            }
+        }else if(tutorial_phase==1){
+            if(tutorialtime_count>time4sec/4){
+                if(tutorialtime_countstop<time4sec/2){
+                    gamespeed = 0f;
+                    tutorialtime_countstop += Time.unscaledDeltaTime;
+                    tutorial_panel.color = new Color32(0,0,0,210);
+                    if(select_difficult==0){
+                        tutorial_text1.text = $"タイミングよく\n歌おう！";
+                    }else if(select_difficult==1){
+                        tutorial_text1.text = $"ノーツの音が高くなるなら上を\n音が低くなるなら下を\n音の高さが変わらないなら\nスティックを触らずに歌おう！";
+                    }else if(select_difficult==2){
+                        tutorial_text1.text = $"スティックを良い感じに傾けて\n音の高さを合わせて歌おう！";
+                    }
+                }else{
+                    gamespeed = 1f;
+                    tutorial_panel.color = new Color32(255,255,255,0);
+                }
+            }
+        }
+        if(notescript.noteend==true){
+            sec2count -= Time.deltaTime;
+        }
+        Tutorial_display();
+    }
+
     // Update is called once per frame
     void Update()
     {
+        if(notescript.notemake_over){
+            Notelistmaker(ref notescript.notes_timingposx_list);
+            Debug.Log("notemake_over");
+            notescript.notemake_over = false;
+        }
         //jumpの入力系統の処理
         if(jumpbothcheck)Jumpcheck();
         
         //リザルト表示
-        if(notescript.noteend==true){
-            ispause = false;
-            sec2count -= Time.deltaTime;
-            if(sec2count<0){
-                Resultdisplay();
+        if(!tutorialmode){
+            if(notescript.noteend==true){
+                ispause = false;
+                sec2count -= Time.deltaTime;
+                if(sec2count<0){
+                    Resultdisplay();
+                }
             }
         }
         
@@ -1019,14 +1222,18 @@ public class GameMaker : MonoBehaviour
             gamespeed = 1f;
             musicstart = true;
         }else{
-
+        
+        }
+        if(musicstart){
+            if(tutorialmode){
+                Tutorial_behaviour();
+            }
         }
         
         //Pause機能
         if(ispause){
             Pausedisplay();
         }
-
 
         Time.timeScale = gamespeed;
 
@@ -1042,14 +1249,20 @@ public class GameMaker : MonoBehaviour
 
         //karaokebarを動かす　白いやつ
         karaokebarpos = karaokebar.transform.position;
-        if(waitstart>=delaytime){
-
-        }else if(karaokebarpos.x >= gamescreenx/2){
-            destroybar = true;
-            karaokebar.transform.position += new Vector3((gamescreenx/time4sec*Time.deltaTime)-gamescreenx,0f,0f);
-        }else{
-            destroybar = false;
-            karaokebar.transform.position += new Vector3(gamescreenx/time4sec*Time.deltaTime,0f,0f);
+        if(waitstart<delaytime){
+            //ノーツかバーが動くかで判定を変える
+            //notemovingはノーツが移動している距離を取得するよう
+            if(realkaraoke){
+                if(karaokebarpos.x >= gamescreenx/2){
+                    destroybar = true;
+                    karaokebar.transform.position += new Vector3((gamescreenx/time4sec*Time.deltaTime)-gamescreenx,0f,0f);
+                }else{
+                    destroybar = false;
+                    karaokebar.transform.position += new Vector3(gamescreenx/time4sec*Time.deltaTime,0f,0f);
+                }
+            }else{
+                notemoving += gamescreenx/time4sec*Time.deltaTime;
+            }
         }
 
         //音を変更
@@ -1059,8 +1272,14 @@ public class GameMaker : MonoBehaviour
                 //images.sprite = speak;
                 zunda_singnow = true;
                 zunda_speak = true;
+
                 //jumpが押された瞬間のxをカウント、ノーツと比べてタイミング判定を行う
-                jump_posx = karaokebarpos.x;
+                //realkaraokeかどうかで判定を変える
+                if(realkaraoke){
+                    jump_posx = karaokebarpos.x;   
+                }else{
+                    jump_posx = notemoving;
+                }
                 Score_timing();
                 //音程が譜面の音程に依存するeasy、normalモードの場合ここでselectsoundを変更する必要がある
                 if(select_difficult==1){
@@ -1081,6 +1300,7 @@ public class GameMaker : MonoBehaviour
             }else{
                 zundavoice_AS.Stop();
                 //images.sprite = mute;
+                if(nowbar!=null)nowbar.GetComponent<greatline>().isnowbar = false;
                 nowbar = null;
                 zunda_singnow = false;
             }
@@ -1102,9 +1322,17 @@ public class GameMaker : MonoBehaviour
 
         //スコア関連_タップ忘れ確認
         //ispauseならストップ
-        if(karaokebarpos.x >= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)){
-            if(!ispause)Score_timing_pass();
+        //
+        if(realkaraoke){
+            if(karaokebarpos.x >= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)){
+                if(!ispause)Score_timing_pass();
+            }
+        }else{
+            if(notemoving >= note_timingposx + (onteiba/time4sec * Judge_score_timing_bad)){
+                if(!ispause)Score_timing_pass();
+            }
         }
+
         //Score_onteiは毎回呼ぶがdestroybarがtrueの時はnote生成を待つためLateに回す、ispauseならパス
         if(!destroybar&&!ispause){
             Score_ontei();

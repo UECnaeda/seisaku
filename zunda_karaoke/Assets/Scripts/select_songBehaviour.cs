@@ -30,8 +30,11 @@ public class select_songBehaviour : MonoBehaviour
     int title_number = 3;
     
     //tutorial関連
-    string[] tutorial_words = {"はい","スキップ","曲選択に戻る"};
+    string[] tutorial_words = {"はい","スキップ","一つ前に戻る"};
+    string[] realkaraoke_words = {"ノーツが動く(かんたん)\n","バーが動く(むずかしい)\n","一つ前に戻る"};
     int select_tutorial = 0;
+    public static bool tutorialmode = false;
+    public static bool realkaraoke = false;
 
 
     //input system関連
@@ -130,6 +133,20 @@ public class select_songBehaviour : MonoBehaviour
         return a % c;
     }
 
+    int Moving_change_int_y(int a, int b, int c){
+        if(a<=0){
+            a+=c;
+        }
+        if(onmove_started){
+            if(moving.y>0){
+                a += b;
+            }else{
+                a -= b;
+            }
+        }
+        return a % c;
+    }
+
     //aをbかcだけ増減させ、a%dを返す関数
     //a<0ならa=a+dをあらかじめする
     int Moving_change_int_xy(int a, int b,int c,int d){
@@ -172,6 +189,25 @@ public class select_songBehaviour : MonoBehaviour
 
     }
 
+    void Realkaraoke(){
+        tutorial_panel.color = new Color32(0,0,0,210);
+        select_tutorial = Moving_change_int_y(select_tutorial,-1,3);
+        tutorialtext1.text = "操作方法を選んでください";
+        Displaytext_selecthelper(realkaraoke_words,select_tutorial,tutorialtext2);
+        if(jump){
+            if(select_tutorial==0){
+                realkaraoke = false;
+                select_thismode++;
+            }else if(select_tutorial==1){
+                realkaraoke = true;
+                select_thismode++;
+            }else if(select_tutorial==2){
+                Initial_tutorial();
+                select_thismode--;
+            }
+        }
+    }
+
     void Start_tutorial(){
         tutorial_panel.color = new Color32(0,0,0,210);
         select_tutorial = Moving_change_int_x(select_tutorial,1,3);
@@ -179,8 +215,10 @@ public class select_songBehaviour : MonoBehaviour
         Displaytext_selecthelper(tutorial_words,select_tutorial,tutorialtext2);
         if(jump){
             if(select_tutorial==0){
-                SceneManager.LoadScene("tutorial");
+                tutorialmode = true;
+                SceneManager.LoadScene("otogame");
             }else if(select_tutorial==1){
+                tutorialmode = false;
                 SceneManager.LoadScene("otogame");
             }else if(select_tutorial==2){
                 Initial_tutorial();
@@ -242,8 +280,11 @@ public class select_songBehaviour : MonoBehaviour
                 Deside_difficult_mode();
             }
         }else if(select_thismode==1){
-            //チュートリアル選択画面
+            //ノーツを動かすかバーを動かすか
+            Realkaraoke();
 
+        }else if(select_thismode==2){
+            //チュートリアル選択画面
             Start_tutorial();
         }
         //input system関連の値を更新

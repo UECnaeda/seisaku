@@ -8,6 +8,7 @@ public class note : MonoBehaviour
 {
     //音楽用
     AudioSource songsound;
+    public AudioClip shiningster_AC, tutorial_AC, kirakiraboshi_AC;
     //生成するノーツ
     public GameObject notes;
     List<GameObject> nownotes = new List<GameObject>();
@@ -31,11 +32,19 @@ public class note : MonoBehaviour
     bool songnow = false;
     bool notelongover = false;
     public bool musicend = false;
+    //realkaraokeモード以外で使うやつ
+    public bool notemake_over = false;
+    public float noteend_loc;
 
     int i;
 
     //判定に使用、ノーツの始まりのposxと、音ありかなしかを追加
     public List<List<float>> notes_timingposx_list = new List<List<float>>();
+
+    //チュートリアル変数
+    int tutorial_phase = 0;
+    bool tutorialmode = false;
+
     //ノーツを作る
     //将来的にはmusicxmlを読み込ませて自動生成できるようにします
     //画面をbeats*６４分割で考えて、その長さ文の値をnotelongに
@@ -46,7 +55,55 @@ public class note : MonoBehaviour
     //songdata={notelong,ontei,kashi}
     //songdata[0]={曲名、BPM、beats}
     string[,] songdata;
-    string[,] shiningstar = new string[,] {
+
+    //音を出すチュートリアル用
+    string[,] tutorial1 = new string[,]{
+        {"チュートリアル1","120","4"},
+        {"384","-1","kyu"},
+        {"48","14","ら"},
+        {"16","-1","kyu"},
+        {"16","14","ら"},
+        {"16","-1","kyu"},
+        {"16","14","ら"},
+        {"1000","-2","fin"},
+    };
+    //音程を操作するチュートリアル用
+    string[,] tutorial2 = new string[,]{
+        {"チュートリアル2","120","4"},
+        {"384","-1","kyu"},
+        {"32","5","ド"},
+        {"32","7","レ"},
+        {"32","9","ミ"},
+        {"32","10","ファ"},
+        {"32","9","ミ"},
+        {"32","7","レ"},
+        {"32","5","ド"},
+        {"1000","-2","fin"},
+    };
+
+    //きらきらぼし　著作権フリーです
+    string[,] kirakiraboshi = new string[,]{
+        {"きらきら星","120","4"},
+        {"384","-1","kyu"},
+        {"16","5","ド"},
+        {"16","5","ド"},
+        {"16","12","ソ"},
+        {"16","12","ソ"},
+        {"16","14","ラ"},
+        {"16","14","ラ"},
+        {"16","12","ソ"},
+        {"16","-1","kyu"},
+        {"16","10","ファ"},
+        {"16","10","ファ"},
+        {"16","9","ミ"},
+        {"16","9","ミ"},
+        {"16","7","レ"},
+        {"16","7","レ"},
+        {"16","5","ド"},
+        {"1000","-2","fin"},
+    };
+
+     string[,] shiningstar = new string[,] {
     {"シャイニングスター","158","4"},
     { "504", "-1" ,"kyu" },
     { "8", "6","た" },
@@ -248,14 +305,117 @@ public class note : MonoBehaviour
 
     }
     void Start()
-    {
-        songdata = shiningstar;
-        notemake();
+    {   
+        Select_song();
         songsound.volume = (float)(GameMaker.instance.volume_music)/10;
         Debug.Log($"music = {songsound.volume}");
 
     }
+
+    void Initial_Values(){
+        //nownotesを初期化
+        Reset_nownotes();
+        notenumbers = 1;
+        noteend = false;
+        songnow = false;
+    }
+
+    //nownotesを空にする
+    void Reset_nownotes(){
+        if (nownotes != null){
+            foreach (GameObject obj in nownotes){
+                Destroy(obj);
+            }
+            nownotes.Clear();
+        }
+    }
+
+    void Select_song(){
+        //初期化
+        Initial_Values();
+        songsound.Stop();
+        songnow = false;
+        //チュートリアルモードの場合
+        if(GameMaker.instance.tutorialmode){
+            tutorialmode = true;
+            tutorial_phase = GameMaker.instance.tutorial_phase;
+            if(tutorial_phase==0){
+                songdata = tutorial1;
+                songsound.clip = tutorial_AC;
+                songsound.loop = true;
+            }else if(tutorial_phase==1){
+                songdata = tutorial2;
+                songsound.clip = tutorial_AC;
+                songsound.loop = true;
+            }else if(tutorial_phase==2){
+                songdata = kirakiraboshi;
+                songsound.clip = kirakiraboshi_AC;
+                songsound.loop = true;
+            }
+        }else{
+            songdata = shiningstar;
+            songsound.clip = shiningster_AC;
+            songsound.loop = false;
+        }
+        //最初のノーツ生成
+        if(!GameMaker.realkaraoke){
+            notemake_notemove();
+            notemake_over = true;
+        }else{
+            notemake();
+            notemake_over = true;
+        }
+    }
     
+    //realkaraokeモードかそうでないかで仕様が大きく変わる
+    //前者なら4小節ごとに決まった位置に4小節生成
+    //後者なら一気に全部生成
+    void notemake_notemove(){
+        notes_timingposx_list.Clear();
+        int song_long = 0;
+
+        Debug.Log($"songdata.GetLength(0) = {songdata.GetLength(0)}");
+        for(int i=1;i<songdata.GetLength(0);++i){
+            int notelong = int.Parse(songdata[i,0]);
+            if(songdata[i, 1] == "-2"){
+                //タイミング計算用
+                List<float> data = new List<float>();
+                noteend_loc = gamescreenx / 256 * (float)(song_long) - gamescreenx / 2;
+                data.Add(noteend_loc);
+                //-2は休符
+                data.Add(-2);
+                notes_timingposx_list.Add(data);
+            }else if(songdata[i,1]!="-1"){
+                noteslocy = karaokebarloc-(karaokebarheight/2) +  (karaokebarheight*float.Parse(songdata[i,1])/soundvalue);
+                notesize = onteiba / 256 * (float)notelong;
+                noteslocx = gamescreenx/256*(float)(song_long)-gamescreenx/2 + notesize/2;
+                //タイミング計算用
+                List<float> data = new List<float>();
+                data.Add(noteslocx - notesize / 2);
+                //音程をadd
+                data.Add(float.Parse(songdata[i,1]));
+                notes_timingposx_list.Add(data);
+                //nownotesにノーツ情報を加える
+                nownotes.Add(Instantiate(notes, new Vector3(noteslocx,noteslocy, -3f), Quaternion.identity));
+                nownotes[nownotes.Count-1].transform.localScale = new Vector3(notesize, 0.26666666f, 1f);
+            }else{
+                //タイミング計算用
+                List<float> data = new List<float>();
+                data.Add(gamescreenx / 256 * (float)(song_long) - gamescreenx / 2);
+                //-1をadd
+                data.Add(-1);
+                notes_timingposx_list.Add(data);
+            }
+            song_long += notelong;
+            Debug.Log($"songdata[{i},2] = {songdata[i,2]}");
+        }
+        //デバッグ用
+        for(int i=0;i<notes_timingposx_list.Count;++i){
+            Debug.Log($"note:note_timingpos_list[{i}][0] = {notes_timingposx_list[i][0]}");
+            Debug.Log($"note:note_timingpos_list[{i}][1] = {notes_timingposx_list[i][1]}");
+        }
+    }
+
     void notemake(){
         notes_timingposx_list.Clear();
         int i = 0;
@@ -287,7 +447,7 @@ public class note : MonoBehaviour
                     List<float> data = new List<float>();
                     data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
                     //-1は休符
-                    data.Add(1);
+                    data.Add(-1);
                     notes_timingposx_list.Add(data);
                 }else{
                     //noteを生成　高さ、長さ、大きさを曲データに合わせる
@@ -317,8 +477,7 @@ public class note : MonoBehaviour
                 songdata[notenumbers, 0] = notelong.ToString();
                 break;
             }
-            if (songdata[notenumbers, 1] == "-2")
-            {
+            if (songdata[notenumbers, 1] == "-2"){
                 //タイミング計算用
                 List<float> data = new List<float>();
                 data.Add(gamescreenx / 256 * (float)(256 - song4syo) - gamescreenx / 2);
@@ -349,9 +508,7 @@ public class note : MonoBehaviour
                 notenumbers++;
                 i++;
                 song4syo -= notelong;
-            }
-            else
-            {
+            }else{
                 //タイミング計算用
                 if(notelongover){
                     notelongover = false;
@@ -368,30 +525,41 @@ public class note : MonoBehaviour
             }
             Debug.Log($"songdata[{nownumbers},2] = {songdata[nownumbers,2]}");
         }
-        for(i=0;i<notes_timingposx_list.Count;++i){
-            Debug.Log($"note:note_timingpos_list[{i}][0] = {notes_timingposx_list[i][0]}");
-            Debug.Log($"note:note_timingpos_list[{i}][1] = {notes_timingposx_list[i][1]}");
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        //チュートリアルモードの記述
+        if(tutorialmode){
+            if(GameMaker.tutorialstart){
+                Select_song();
+                Debug.Log($"tutorial_phase = {GameMaker.instance.tutorial_phase}");
+                GameMaker.tutorialstart = false;
+            }
+        }
+
+        //チュートリアルモード終了時の処理
+        if(tutorialmode&&!GameMaker.instance.tutorialmode){
+            tutorialmode = false;
+            Select_song();
+        }
         if(GameMaker.instance.musicstart&&!songnow){
             Debug.Log("note:start music");
             songsound.Play();
             songnow = true;
         }
-        songsound.pitch = GameMaker.instance.gamespeed;
+        //songsound.pitch = GameMaker.instance.gamespeed;
+        //norealkaraokeモードの時の修了処理
+        if(GameMaker.realkaraoke==false){
+            if(noteend_loc<GameMaker.instance.notemoving){
+                noteend = true;
+            }
+        }
         //譜面できたら全部壊して全部作る
         //4小節分生成していく予定ですが…
         if(GameMaker.instance.destroybar){
-            if (nownotes != null){
-                foreach (GameObject obj in nownotes){
-                    Destroy(obj);
-                }
-                nownotes.Clear();
-            }
+            Reset_nownotes();
             notemake();
         }
     }

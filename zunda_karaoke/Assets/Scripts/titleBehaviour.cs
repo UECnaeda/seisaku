@@ -47,7 +47,7 @@ public class titleBehaviour : MonoBehaviour
     bool option_changevalue = false;
 
     //受け渡し値　staticおじさん
-    public static int volume_music = 3;
+    public static int volume_music = 1;
     public static int volume_voice = 3;
 
     public static int delaytime = -5;
@@ -237,7 +237,7 @@ public class titleBehaviour : MonoBehaviour
         //上手いやり方ありそうだけどとりあえず力技
         int i = option_select_number % option_select_sum;
         Option_text.text = "<color=yellow>音量設定</color>\n";
-        Option_texthelper(i,0,"　曲(0～10)　",volume_music,0f,"",false,true);
+        Option_texthelper(i,0,"　曲(0～10)　",volume_music,0f,"",false,false);
         Option_texthelper(i,1,"　声(0～10)　",volume_voice,0f,"",false,true);
         Option_text.text += "<color=yellow>判定調整</color>\n";
         Option_texthelper(i,2,"　タイミング調整(+で判定遅め)　",delaytime,0f,"",false,true);
