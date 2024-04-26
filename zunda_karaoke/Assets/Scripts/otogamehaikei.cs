@@ -18,15 +18,19 @@ public class otogamehaikei : MonoBehaviour
     void Update()
     {
         karaoke.color = new Color32(255,255,255,255);
-        if(GameMaker.score>GameMaker.instance.face_good_score){
-            karaoke.sprite = good_haikei;
-        }else if(GameMaker.score>GameMaker.instance.face_normal_score){
-            karaoke.sprite = normal_haikei;
-        }else if(GameMaker.score>GameMaker.instance.face_nogood_score){
+        if(GameMaker.instance.tutorialmode){
             karaoke.sprite = nogood_haikei;
         }else{
-            karaoke.sprite = nogood_haikei;
-            karaoke.color = new Color32(70,70,70,255);
+            if(GameMaker.score>GameMaker.instance.face_good_score){
+                karaoke.sprite = good_haikei;
+            }else if(GameMaker.score>GameMaker.instance.face_normal_score){
+                karaoke.sprite = normal_haikei;
+            }else if(GameMaker.score>GameMaker.instance.face_nogood_score){
+                karaoke.sprite = nogood_haikei;
+            }else{
+                karaoke.sprite = nogood_haikei;
+                karaoke.color = new Color32(70,70,70,255);
+            }
         }
     }
 }

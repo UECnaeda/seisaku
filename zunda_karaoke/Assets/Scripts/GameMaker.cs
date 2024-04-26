@@ -208,6 +208,7 @@ public class GameMaker : MonoBehaviour
     int tutorial_select = 0;
     bool tutorial_title = false;
 
+
     [SerializeField] Sprite controller_fig;
     [SerializeField] Sprite controller_singfig;
     [SerializeField] Sprite controller_stickfig;
@@ -216,7 +217,12 @@ public class GameMaker : MonoBehaviour
     [SerializeField] TMP_Text tutorial_text1;
     [SerializeField] Image tutorial_panel;
     [SerializeField] SpriteRenderer controller_image;
+    [SerializeField] SpriteRenderer controller_left;
+    [SerializeField] SpriteRenderer controller_right;
+    [SerializeField] Sprite contoroller_leftfg,controller_rightfg,controller_left_upfg,controller_left_downfg,controller_right_xfg,controller_right_rfg,controller_right_rxfg,controller_left_stickfg;
     
+    //テスト用
+    public bool iscontrollerdisp = false;
 
 
 
@@ -1228,6 +1234,39 @@ public class GameMaker : MonoBehaviour
             if(tutorialmode){
                 Tutorial_behaviour();
             }
+        }
+        //チュートリアル動画撮影用　ゲームには関係なし
+        if(iscontrollerdisp){
+            controller_image.color = new Color32(255,255,255,0);
+            controller_left.color = new Color32(255,255,255,255);
+            controller_right.color = new Color32(255,255,255,255);
+            //入力受付
+            //左側
+            if(moving.y>0){
+                controller_left.sprite = controller_left_upfg;
+            }else if(moving.y<0){
+                controller_left.sprite = controller_left_downfg;
+            }else{
+                controller_left.sprite = controller_left_stickfg;
+            }
+
+            //右側
+            if(jump1==0){
+                if(jump2==0){
+                    controller_right.sprite = controller_rightfg;
+                }else{
+                    controller_right.sprite = controller_right_rfg;
+                }
+            }else{
+                if(jump2==0){
+                    controller_right.sprite = controller_right_xfg;
+                }else{
+                    controller_right.sprite = controller_right_rxfg;
+                }
+            }
+        }else {
+            controller_left.color = new Color32(255,255,255,0);
+            controller_right.color = new Color32(255,255,255,0);
         }
         
         //Pause機能

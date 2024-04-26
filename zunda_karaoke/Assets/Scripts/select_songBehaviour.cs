@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Video;
 using TMPro;
 
 
@@ -20,6 +21,11 @@ public class select_songBehaviour : MonoBehaviour
     [SerializeField] Image tutorial_panel;
     [SerializeField] TMP_Text tutorialtext1;
     [SerializeField] TMP_Text tutorialtext2;
+    [SerializeField] VideoPlayer demo_VP;
+    [SerializeField] VideoClip easy_barmove_mp4,normal_barmove_mp4,hard_barmove_mp4,easy_notemove_mp4,normal_notemove_mp4,hard_notemove_mp4;
+    [SerializeField] RawImage demo_RI;
+
+    bool difficult_selected = false;
 
     //結構遷移させるのでモード番号を管理
     //難易度選択を0,チュートリアル選択を1とする
@@ -34,7 +40,10 @@ public class select_songBehaviour : MonoBehaviour
     string[] realkaraoke_words = {"ノーツが動く(かんたん)\n","バーが動く(むずかしい)\n","一つ前に戻る"};
     int select_tutorial = 0;
     public static bool tutorialmode = false;
+
+    //realkaraoke
     public static bool realkaraoke = false;
+    int select_realkaraoke = 0;
 
 
     //input system関連
@@ -189,21 +198,56 @@ public class select_songBehaviour : MonoBehaviour
 
     }
 
+    void Video_start(){
+        demo_VP.Stop();
+        if(select_realkaraoke==0){
+            if(select_difficult==0){
+                demo_VP.clip = easy_notemove_mp4;
+            }else if(select_difficult==1){
+                demo_VP.clip = normal_notemove_mp4;
+            }else if(select_difficult==2){
+                demo_VP.clip = hard_notemove_mp4;
+            }
+            demo_VP.Play();
+        }else if(select_realkaraoke==1){
+            if(select_difficult==0){
+                demo_VP.clip = easy_barmove_mp4;
+            }else if(select_difficult==1){
+                demo_VP.clip = normal_barmove_mp4;
+            }else if(select_difficult==2){
+                demo_VP.clip = hard_barmove_mp4;
+            }
+            demo_VP.Play();
+        }
+    }
+
     void Realkaraoke(){
+        demo_RI.color = new Color32(255,255,255,255);
+        if(difficult_selected){
+            Video_start();
+            difficult_selected = false;
+        }
         tutorial_panel.color = new Color32(0,0,0,210);
-        select_tutorial = Moving_change_int_y(select_tutorial,-1,3);
+        select_realkaraoke = Moving_change_int_y(select_realkaraoke,-1,3);
+        if(onmove_started){
+            if(select_realkaraoke==0||select_realkaraoke==1){
+                Video_start();
+            }
+        }
         tutorialtext1.text = "操作方法を選んでください";
-        Displaytext_selecthelper(realkaraoke_words,select_tutorial,tutorialtext2);
+        Displaytext_selecthelper(realkaraoke_words,select_realkaraoke,tutorialtext2);
         if(jump){
-            if(select_tutorial==0){
+            if(select_realkaraoke==0){
                 realkaraoke = false;
                 select_thismode++;
-            }else if(select_tutorial==1){
+            }else if(select_realkaraoke==1){
                 realkaraoke = true;
                 select_thismode++;
-            }else if(select_tutorial==2){
+            }else if(select_realkaraoke==2){
                 Initial_tutorial();
+                demo_VP.Stop();
                 select_thismode--;
+                demo_RI.color = new Color32(255,255,255,0);
             }
         }
     }
@@ -239,6 +283,7 @@ public class select_songBehaviour : MonoBehaviour
         if(select_difficult==title_number){
             SceneManager.LoadScene("title");
         }else{
+            difficult_selected = true;
             select_thismode++;
         }
     }

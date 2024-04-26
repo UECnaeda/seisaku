@@ -45,3 +45,4 @@
 *.reason !filter !diff !merge -text
 *.lxo !filter !diff !merge -text
 karaoke/assets/font/nikumaru[[:space:]]SDF.asset filter=lfs diff=lfs merge=lfs -text
+zunda_karaoke_build/zundakaraoke_Data/sharedassets2.resource filter=lfs diff=lfs merge=lfs -text
