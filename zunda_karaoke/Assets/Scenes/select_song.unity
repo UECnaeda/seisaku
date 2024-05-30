@@ -165,12 +165,12 @@ MonoBehaviour:
   tutorialtext1: {fileID: 1482013373}
   tutorialtext2: {fileID: 742442536}
   demo_VP: {fileID: 1606251111}
-  easy_barmove_mp4: {fileID: 32900000, guid: fd9ed529493a9b842aecf3e058699589, type: 3}
-  normal_barmove_mp4: {fileID: 32900000, guid: 58a36ea22f3b342449792723c47436ac, type: 3}
-  hard_barmove_mp4: {fileID: 32900000, guid: 0443ad57529342d48a5874e54d022ec2, type: 3}
-  easy_notemove_mp4: {fileID: 32900000, guid: beb94c0704d78d34b93432ddf0519e15, type: 3}
-  normal_notemove_mp4: {fileID: 32900000, guid: fa8a68e2f2b3bf64fbd0802422c13ef8, type: 3}
-  hard_notemove_mp4: {fileID: 32900000, guid: 6e333059cfe9529489d942e77a7f650d, type: 3}
+  easy_barmove_mp4: {fileID: 32900000, guid: 2545b34a62e863e4d89b07956a439c97, type: 3}
+  normal_barmove_mp4: {fileID: 32900000, guid: 55e4bd92cfcd58c44917742718f54708, type: 3}
+  hard_barmove_mp4: {fileID: 32900000, guid: d585b46b7b2650349a38d97f029d35b1, type: 3}
+  easy_notemove_mp4: {fileID: 32900000, guid: 824a2fb60762a5f45b8b0fa7ea20fe61, type: 3}
+  normal_notemove_mp4: {fileID: 32900000, guid: b6591104dabf53645ae554c0102644e1, type: 3}
+  hard_notemove_mp4: {fileID: 32900000, guid: 980414d0b70a91d4391ed3100a18d387, type: 3}
   demo_RI: {fileID: 1606251112}
 --- !u!4 &15559311
 Transform:
