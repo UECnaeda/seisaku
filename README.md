@@ -1,7 +1,6 @@
 # seisaku
 
-制作物まとめです。
-各ファイルにその制作物の説明を載せております。
+ゲームの制作物まとめです。
 
 # 注意事項
 
@@ -11,18 +10,23 @@ Git LFSを用いてアップロードしたファイルはGit LFSによって管
 
 そのため、お手数をおかけしますが、Git LFSを使用しているファイルを確認したい方は**Git LFSの導入**をお願いいたします。
 
-導入手順は以下のサイトなどを参考にお願いいたします。
+導入は以下のサイトなどを参考にお願いいたします。
 
 <https://docs.github.com/ja/repositories/working-with-files/managing-large-files/installing-git-large-file-storage>
 
 なお、Git LFSは無料で利用できますが、**ダウンロードに月1GiBの制限**があります。
 
-Git LFSの導入が出来なかったり、制限に引っかかる人は以下のURLからダウンロードをお願いいたします。
+Git LFSの導入が出来なかったり、制限に引っかかる方は以下のURLからダウンロードをお願いいたします。
 
 ## Git LFSの利用状況
 現在Git LFSを利用しているファイルは以下の通りです。
 - zunda_karaoke/assets/font/nikumaru SDF.asset
 
+# 各ファイルについて
+
+各ファイルの簡単な説明になります。
+
+詳しい説明は各ファイル内にREADMEを掲載しております。
 
 ## blockhockey
 
