@@ -16,7 +16,9 @@ Git LFSを用いてアップロードしたファイルはGit LFSによって管
 
 なお、Git LFSは無料で利用できますが、**ダウンロードに月1GiBの制限**があります。
 
-Git LFSの導入が出来なかったり、制限に引っかかる方は以下のURLからダウンロードをお願いいたします。
+Git LFSの導入が出来なかったり、制限に引っかかる方は以下のURLからダウンロードをお願いいたします。(MEGAファイル)
+
+<https://mega.nz/folder/CLIynIaQ#xyF5mXC8YTe9H6GDQPkTZw>
 
 ## Git LFSの利用状況
 現在Git LFSを利用しているファイルは以下の通りです。
