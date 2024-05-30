@@ -13,7 +13,7 @@ Git LFSを用いてアップロードしたファイルはGit LFSによって管
 
 導入手順は以下のサイトなどを参考にお願いいたします。
 
-https://docs.github.com/ja/repositories/working-with-files/managing-large-files/installing-git-large-file-storage
+<https://docs.github.com/ja/repositories/working-with-files/managing-large-files/installing-git-large-file-storage>
 
 なお、Git LFSは無料で利用できますが、*ダウンロードに月1GiBの制限*があります。
 
