@@ -45,6 +45,9 @@ public class note : MonoBehaviour
     int tutorial_phase = 0;
     bool tutorialmode = false;
 
+    //pause用
+    bool pausecheck = false;
+
     //ノーツを作る
     //将来的にはmusicxmlを読み込ませて自動生成できるようにします
     //画面をbeats*６４分割で考えて、その長さ文の値をnotelongに
@@ -530,6 +533,14 @@ public class note : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //pause機能
+        if(pausecheck==false&&GameMaker.instance.ispause==true){
+            songsound.Pause();
+            pausecheck = true;
+        }else if(pausecheck==true&&GameMaker.instance.ispause==false){
+            songsound.UnPause();
+            pausecheck = false;
+        }
         //チュートリアルモードの記述
         if(tutorialmode){
             if(GameMaker.tutorialstart){

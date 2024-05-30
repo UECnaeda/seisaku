@@ -2455,6 +2455,7 @@ MonoBehaviour:
   zundavoice_AS: {fileID: 0}
   volume_music: 0
   volume_voice: 0
+  ispause: 0
   result1_text: {fileID: 1733441020}
   result2_text: {fileID: 659054257}
   result3_text: {fileID: 1179925780}
@@ -2483,7 +2484,7 @@ MonoBehaviour:
   controller_right_rfg: {fileID: 21300000, guid: 2a91ec734605440428044e9895cfa868, type: 3}
   controller_right_rxfg: {fileID: 21300000, guid: a3962853131e4ec44b3d6b36f24e0778, type: 3}
   controller_left_stickfg: {fileID: 21300000, guid: 9fcf355e0735cd24990d15daf5c229a0, type: 3}
-  iscontrollerdisp: 1
+  iscontrollerdisp: 0
 --- !u!4 &1689626820
 Transform:
   m_ObjectHideFlags: 0

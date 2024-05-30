@@ -171,7 +171,7 @@ public class GameMaker : MonoBehaviour
     public int volume_voice;
 
     //pause用
-    bool ispause = false;
+    public bool ispause = false;
     int pause_select = 0;
     string[] pause_words = {"ポーズ解除","最初から","曲選択"};
 
