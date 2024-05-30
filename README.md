@@ -5,17 +5,17 @@
 
 # 注意事項
 
-GitHubの仕様上、100MBを超えるファイルは"Git Large File Storage(以下"Git LFS"と記述します)"を導入してアップロードを行っています。
+GitHubの仕様上、100MiBを超えるファイルは**Git Large File Storage**(以下**Git LFS**と記述します)を導入してアップロードを行っています。
 
 Git LFSを用いてアップロードしたファイルはGit LFSによって管理されるファイルになるため、**Git LFSを導入していない端末からのクローンや、webからのzipファイルによるダウンロードが正常に行えない状態になります。**
 
-そのため、Git LFSを使用しているファイルを確認したい方はお手数をおかけしますがダウンロード前に**Git LFSの導入**をお願いいたします。
+そのため、お手数をおかけしますが、Git LFSを使用しているファイルを確認したい方は**Git LFSの導入**をお願いいたします。
 
 導入手順は以下のサイトなどを参考にお願いいたします。
 
 <https://docs.github.com/ja/repositories/working-with-files/managing-large-files/installing-git-large-file-storage>
 
-なお、Git LFSは無料で利用できますが、*ダウンロードに月1GiBの制限*があります。
+なお、Git LFSは無料で利用できますが、**ダウンロードに月1GiBの制限**があります。
 
 Git LFSの導入が出来なかったり、制限に引っかかる人は以下のURLからダウンロードをお願いいたします。
 
